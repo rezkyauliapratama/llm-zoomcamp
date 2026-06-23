@@ -22,7 +22,6 @@ homework/01-agentic-rag/
 ├── rag_helper.py       # RAGBase class (adapted from DataTalksClub original)
 ├── minsearch.py        # lightweight in-memory full-text search index
 ├── requirements.txt    # pip-compatible dependency list
-├── answers.md          # homework answers
 └── README.md           # this file
 ```
 

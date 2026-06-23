@@ -18,17 +18,9 @@ Not legal advice — always verify with original source documents.
 
 ```
 llm-zoomcamp/
-├── homework/
-│   └── 01-agentic-rag/       # Module 01 Homework
-└── final-project/            # OJK/BI Regulatory Intelligence Assistant
-    ├── data/
-    ├── ingestion/
-    ├── retrieval/
-    ├── generation/
-    ├── evaluation/
-    ├── monitoring/
-    ├── interface/
-    └── deployment/
+└── homework/
+    └── 01-agentic-rag/       # Module 01 Homework
+
 ```
 
 ---
@@ -37,7 +29,7 @@ llm-zoomcamp/
 
 | Module | Title | Homework | Status |
 |--------|-------|----------|--------|
-| 01 | Agentic RAG | [homework/01-agentic-rag](./homework/01-agentic-rag/) | 🔄 In Progress |
+| 01 | Agentic RAG | [homework/01-agentic-rag](./homework/01-agentic-rag/) | Done |
 | 02 | Open-Source LLMs | TBD | ⏳ Pending |
 | 03 | Vector Search & Retrieval | TBD | ⏳ Pending |
 | 04 | Evaluation | TBD | ⏳ Pending |
@@ -45,16 +37,6 @@ llm-zoomcamp/
 | 06 | Best Practices | TBD | ⏳ Pending |
 | 07 | Chunking Strategies | TBD | ⏳ Pending |
 | 08 | Ingestion Pipelines | TBD | ⏳ Pending |
-
----
-
-## 🎯 Final Project
-
-**[OJK/BI Regulatory Intelligence Assistant](./final-project/)**
-
-AI-powered compliance Q&A system for Indonesian banking regulation. Answers natural language questions about POJK, SE OJK, and PBI documents with explicit pasal citations.
-
-→ See [final-project/README.md](./final-project/README.md) for full documentation.
 
 ---
 
