@@ -1,83 +1,124 @@
-# 📝 Homework 01 — Agentic RAG
+# Homework 1 – Agentic RAG
 
-> **Module:** 01 - Agentic RAG  
-> **Official Homework:** [cohorts/2026/01-agentic-rag/homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)  
+> **LLM Zoomcamp 2026 · Module 01-agentic-rag**
 
----
-
-## 🗂 Structure
-
-```
-01-agentic-rag/
-├── README.md              # This file
-├── notebook.ipynb         # Main solution notebook
-├── requirements.txt       # Python dependencies
-├── rag_base.py            # RAGBase class (Part 1)
-├── agentic_rag.py         # AgenticRAG class (Part 2)
-├── data/
-│   └── documents.db       # SQLite index (auto-generated)
-└── answers.md             # Final answers to submit
-```
+Official homework spec → [cohorts/2026/01-agentic-rag/homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)
 
 ---
 
-## 📋 Questions
+## Overview
 
-### Section A — RAG Fundamentals (Part 1)
+Build a RAG system over the LLM Zoomcamp lesson pages, then progressively improve it:
 
-| # | Question | Status |
-|---|----------|--------|
-| Q1 | Dataset Exploration — total records for `data-engineering-zoomcamp` | ⬜ |
-| Q2 | Search Basics — highest score for `"How do I run Kafka?"` | ⬜ |
-| Q3 | Prompt Construction — character length of built prompt | ⬜ |
-| Q4 | RAG Pipeline End-to-End — most frequent word in LLM answer | ⬜ |
-| Q5 | Token Usage — total `prompt_tokens` used in Q4 | ⬜ |
-
-### Section B — Data Ingestion
-
-| # | Question | Status |
-|---|----------|--------|
-| Q6 | SQLite Ingestion — indexing time in seconds | ⬜ |
-| Q7 | Persistence Validation — identical results after restart? | ⬜ |
-
-### Section C — Agents & Function Calling (Part 2)
-
-| # | Question | Status |
-|---|----------|--------|
-| Q8 | Tool Definition — number of required parameters | ⬜ |
-| Q9 | Function Calling Output — tool name and `query` argument value | ⬜ |
-| Q10 | Agentic Loop Iteration Count — iterations for complex query | ⬜ |
-| Q11 | No-Tool Scenario — does `"Thank you!"` trigger tool call? | ⬜ |
-| Q12 | Safety Limit — behavior with `max_iterations=3` | ⬜ |
-
-### Bonus
-
-| # | Question | Status |
-|---|----------|--------|
-| B1 | Multi-Source Agent — does agent call both tools? | ⬜ |
-| B2 | Agent vs Fixed RAG Comparison — 5 query comparison | ⬜ |
+| Step | What we do |
+|------|------------|
+| Q1 | Count lesson pages fetched from GitHub |
+| Q2 | Index with **minsearch** and do a first search |
+| Q3 | Full RAG pipeline, measure input tokens |
+| Q4 | Chunk documents (size=2000, step=1000) and count chunks |
+| Q5 | RAG over chunk index, compare token usage |
+| Q6 | **Agentic RAG** — give an LLM a `search` tool via toyaikit |
 
 ---
 
-## 🚀 Setup
+## Tech Stack
+
+| Component | Choice | Reason |
+|-----------|--------|--------|
+| LLM | `deepseek/deepseek-chat-v4-flash` via **OpenRouter** | Fast, cheap, OpenAI-compatible API |
+| Search | **minsearch** (local, pure-Python) | Simple BM25-style, zero infra |
+| Data loader | **gitsource** | Downloads pinned commit from GitHub |
+| Agent framework | **toyaikit** | Lightweight tool-calling loop from the course |
+
+---
+
+## Setup
+
+### 1. Clone & navigate
 
 ```bash
-# Create virtual environment
-uv venv
-source .venv/bin/activate
+git clone https://github.com/rezkyauliapratama/llm-zoomcamp.git
+cd llm-zoomcamp/homework/01-agentic-rag
+```
 
-# Install dependencies
-uv pip install -r requirements.txt
+### 2. Create virtual environment
 
-# Set OpenAI API key
-export OPENAI_API_KEY=your_key_here
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+```
 
-# Launch notebook
-jupyter notebook notebook.ipynb
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Set your OpenRouter API key
+
+Option A – environment variable (recommended):
+```bash
+cp .env.template .env
+# Edit .env and paste your key
+export OPENROUTER_API_KEY=sk-or-...
+```
+
+Option B – edit `homework.py` directly:
+```python
+OPENROUTER_API_KEY = "sk-or-your-key-here"
+```
+
+Get a free key at <https://openrouter.ai/keys>.
+
+---
+
+## Run
+
+```bash
+python homework.py
+```
+
+Expected output (values are approximate):
+
+```
+[1] Loading lesson pages from GitHub...
+Q1 – Number of lesson pages: 72
+
+[2] Indexing documents with minsearch...
+Q2 – Filename of first result: 01-agentic-rag/lessons/14-agentic-loop.md
+
+[3] Building RAG over full-document index...
+Q3 – Input tokens (full-doc RAG): ~7000
+
+[4] Chunking documents...
+Q4 – Number of chunks: 295
+
+[5] Indexing chunks and running chunked RAG...
+Q5 – Input tokens (chunked RAG): ~700
+     Ratio full/chunked: ~10x fewer tokens with chunking
+
+[6] Building agentic RAG with toyaikit...
+Q6 – Number of search() calls: 4
 ```
 
 ---
 
-## 📦 Dependencies
+## Project Structure
 
-See [`requirements.txt`](./requirements.txt).
+```
+homework/01-agentic-rag/
+├── .env.template      # API key template (copy to .env)
+├── homework.py        # Main solution script (all 6 questions)
+├── minsearch.py       # Local minsearch implementation
+├── requirements.txt   # Python dependencies
+└── README.md          # This file
+```
+
+---
+
+## Notes
+
+- The dataset is pinned to commit `8c1834d` of the DataTalksClub/llm-zoomcamp repo so results are reproducible.
+- Token counts for Q3/Q5 may vary slightly depending on model and API version.
+- Q6 agent call count may vary (LLM decides autonomously); closest option is **4**.
+- Submit answers at <https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw1>.

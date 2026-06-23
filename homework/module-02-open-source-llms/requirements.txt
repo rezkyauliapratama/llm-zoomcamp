@@ -1,7 +1,0 @@
-# Module 02 - Open-Source LLMs
-openai>=1.0.0
-ollama>=0.1.0
-jupyter>=1.0.0
-transformers>=4.40.0
-torch>=2.0.0
-sentence-transformers>=2.7.0
