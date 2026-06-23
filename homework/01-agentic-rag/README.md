@@ -154,7 +154,7 @@ Q4 - Number of chunks: 295
 
 [5] Indexing chunks and running chunked RAG...
 Q5 - Input tokens (chunked RAG): ~700
-     Ratio full/chunked: ~10x fewer tokens with chunking
+     Ratio full/chunked: ~3x fewer tokens with chunking
 
 [6] Building agentic RAG (hand-written loop)...
 Q6 - Number of search() calls: 4
