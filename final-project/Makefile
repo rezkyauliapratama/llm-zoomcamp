@@ -1,19 +1,35 @@
-.PHONY: up down ingest eval app
+.PHONY: help setup ingest evaluate app monitoring clean
 
-up:
-	docker-compose -f docker/docker-compose.yml up -d
+help:
+	@echo "OJK AI Regulation Q&A — Available commands:"
+	@echo "  make setup       Install dependencies"
+	@echo "  make services    Start Docker services (ES, Grafana, PostgreSQL)"
+	@echo "  make ingest      Run document ingestion pipeline"
+	@echo "  make evaluate    Run RAG evaluation suite"
+	@echo "  make app         Launch Streamlit app"
+	@echo "  make clean       Stop and remove Docker services"
 
-down:
-	docker-compose -f docker/docker-compose.yml down
+setup:
+	pip install -r requirements.txt
+
+services:
+	docker-compose up -d
+
+services-down:
+	docker-compose down
 
 ingest:
-	python pipeline/ingestion_pipeline.py
+	python src/ingestion.py
 
-eval:
-	python -m pytest src/evaluation/ -v
+evaluate:
+	jupyter nbconvert --to notebook --execute notebooks/03-evaluation.ipynb
 
 app:
 	streamlit run app/app.py
 
-lint:
-	ruff check src/ app/ pipeline/
+monitoring:
+	docker-compose -f monitoring/docker-compose.yml up -d
+
+clean:
+	docker-compose down -v
+	docker-compose -f monitoring/docker-compose.yml down -v

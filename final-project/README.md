@@ -1,103 +1,83 @@
-# LLM Zoomcamp — Final Project
+# Final Project — OJK AI Regulation Q&A System
 
-## Project Title
-**OJK Regulatory Q&A Assistant** — RAG-based intelligent assistant for Indonesian financial regulation (OJK/BI)
+## Overview
+An intelligent Q&A system for OJK (Otoritas Jasa Keuangan) AI-related regulations, built using a RAG (Retrieval-Augmented Generation) architecture. The system enables bank staff and compliance officers to query regulatory documents in natural language and receive accurate, cited answers.
 
 ## Problem Statement
-Navigating OJK (Otoritas Jasa Keuangan) and Bank Indonesia regulatory documents is time-consuming for compliance teams and banking professionals. This project builds a production-grade RAG system that allows users to query regulatory documents in natural language.
+OJK and Bank Indonesia are actively issuing AI governance frameworks (POJK, SEOJK, and Cetak Biru AI). Compliance teams struggle to navigate the volume of regulatory text. This system provides a conversational interface grounded in verified regulatory sources.
 
 ## Architecture
-
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User Interface                       │
-│              (Streamlit / FastAPI)                      │
-└─────────────────────┬───────────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────────┐
-│                  RAG Pipeline                           │
-│  Query → Retrieval → Reranking → Generation → Response  │
-└──────┬──────────────────────────────────────┬───────────┘
-       │                                      │
-┌──────▼──────┐                    ┌──────────▼──────────┐
-│  Vector DB  │                    │     LLM Backend     │
-│ (Elasticsearch│                  │  (OpenAI / Ollama)  │
-│  / pgvector)│                    └─────────────────────┘
-└─────────────┘
+[Regulatory PDFs] → [Ingestion Pipeline] → [Vector Store (Qdrant/Elasticsearch)]
+                                                        ↓
+[User Query] → [Retrieval] → [Reranking] → [LLM Generation] → [Cited Answer]
+                                                        ↓
+                                              [Monitoring (Grafana/PostgreSQL)]
 ```
 
-## Tech Stack
+## Stack
 | Component | Technology |
-|-----------|------------|
-| Embedding Model | `text-embedding-3-small` / `BAAI/bge-m3` |
-| Vector Store | Elasticsearch / pgvector |
-| LLM | GPT-4o-mini / Llama 3 (Ollama) |
-| Orchestration | Mage AI / Prefect |
-| Monitoring | Grafana + Prometheus |
-| UI | Streamlit |
+|---|---|
+| LLM | GPT-4o / Mistral 7B (open-source fallback) |
+| Vector Store | Elasticsearch / Qdrant |
+| Embeddings | text-embedding-3-small / bge-m3 |
+| Orchestration | Mage AI |
+| Monitoring | PostgreSQL + Grafana |
+| App | Streamlit |
 | Containerization | Docker Compose |
 
-## Dataset
-- OJK POJK (Peraturan OJK) documents
-- Bank Indonesia circulars and regulations
-- SEOJK (Surat Edaran OJK) documents
-
-## Evaluation Metrics
-- Hit Rate & MRR (retrieval quality)
-- ROUGE-L / cosine similarity (answer quality)
-- LLM-as-judge scoring
-- Latency P50/P95/P99
-
-## Folder Structure
-
+## Project Structure
 ```
 final-project/
-├── data/                    # Raw & processed regulatory documents
-│   ├── raw/                 # Original PDFs / text files
-│   └── processed/           # Chunked & indexed documents
-├── ingestion/               # Data ingestion & indexing pipeline
-│   ├── chunking.py
-│   ├── embeddings.py
-│   └── indexing.py
-├── retrieval/               # Retrieval & reranking logic
-│   ├── search.py
-│   └── reranker.py
-├── generation/              # LLM generation & prompt templates
-│   ├── prompts.py
-│   └── llm_client.py
-├── evaluation/              # Evaluation scripts
-│   ├── generate_ground_truth.py
-│   └── evaluate.py
-├── monitoring/              # Grafana dashboards & metrics
-│   ├── grafana/
-│   └── prometheus/
-├── app/                     # Streamlit UI
-│   └── streamlit_app.py
-├── notebooks/               # Exploration & prototyping
-├── docker-compose.yml       # Full stack deployment
-├── Dockerfile
-├── requirements.txt
-└── README.md
+├── data/
+│   ├── raw/          # Original regulatory PDF documents
+│   └── processed/    # Chunked & embedded documents
+├── src/
+│   ├── ingestion.py  # Document ingestion pipeline
+│   ├── retrieval.py  # Vector search & hybrid retrieval
+│   ├── generation.py # LLM generation with citations
+│   └── evaluation.py # RAG evaluation metrics
+├── notebooks/
+│   ├── 01-data-exploration.ipynb
+│   ├── 02-rag-baseline.ipynb
+│   └── 03-evaluation.ipynb
+├── app/
+│   └── app.py        # Streamlit application
+├── monitoring/
+│   ├── docker-compose.yml
+│   └── grafana/dashboard.json
+├── Makefile
+├── docker-compose.yml
+└── requirements.txt
 ```
 
-## Getting Started
-
+## Setup
 ```bash
-# Clone and setup
+# Clone the repo
 git clone https://github.com/rezkyauliapratama/llm-zoomcamp
 cd llm-zoomcamp/final-project
 
 # Start services
 docker-compose up -d
 
-# Run ingestion pipeline
-python ingestion/indexing.py
+# Install dependencies
+pip install -r requirements.txt
 
-# Launch UI
-streamlit run app/streamlit_app.py
+# Run ingestion
+python src/ingestion.py
+
+# Launch app
+streamlit run app/app.py
 ```
 
+## Evaluation Targets
+- **Hit Rate @5**: > 0.80
+- **MRR @5**: > 0.65
+- **LLM-as-judge Relevance**: > 4.0/5.0
+- **Answer Faithfulness**: > 0.85
+- **TTFT**: < 2s
+
 ## References
-- [LLM Zoomcamp Course](https://github.com/DataTalksClub/llm-zoomcamp)
-- [OJK Official Website](https://www.ojk.go.id)
-- [Bank Indonesia Regulations](https://www.bi.go.id)
+- [LLM Zoomcamp — DataTalksClub](https://github.com/DataTalksClub/llm-zoomcamp)
+- [OJK POJK AI Regulation](https://www.ojk.go.id)
+- [BI Cetak Biru AI](https://www.bi.go.id)

@@ -1,0 +1,10 @@
+{
+  "title": "OJK RAG System Monitoring",
+  "panels": [],
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "schemaVersion": 38,
+  "version": 1,
+  "description": "Monitoring dashboard for OJK AI Regulation Q&A RAG pipeline"
+}
