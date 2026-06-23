@@ -1,83 +1,120 @@
-# 📝 Homework 01 — Agentic RAG
+# Homework 1 — Agentic RAG
 
-> **Module:** 01 - Agentic RAG  
-> **Official Homework:** [cohorts/2026/01-agentic-rag/homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)  
-
----
-
-## 🗂 Structure
-
-```
-01-agentic-rag/
-├── README.md              # This file
-├── notebook.ipynb         # Main solution notebook
-├── requirements.txt       # Python dependencies
-├── rag_base.py            # RAGBase class (Part 1)
-├── agentic_rag.py         # AgenticRAG class (Part 2)
-├── data/
-│   └── documents.db       # SQLite index (auto-generated)
-└── answers.md             # Final answers to submit
-```
+> **LLM Zoomcamp 2026 · Module 01**
+> Reference: [homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)
 
 ---
 
-## 📋 Questions
+## Overview
 
-### Section A — RAG Fundamentals (Part 1)
+Builds a RAG system over the LLM Zoomcamp course lessons, then evolves it into an agentic pipeline where the LLM decides when and what to search.
 
-| # | Question | Status |
-|---|----------|--------|
-| Q1 | Dataset Exploration — total records for `data-engineering-zoomcamp` | ⬜ |
-| Q2 | Search Basics — highest score for `"How do I run Kafka?"` | ⬜ |
-| Q3 | Prompt Construction — character length of built prompt | ⬜ |
-| Q4 | RAG Pipeline End-to-End — most frequent word in LLM answer | ⬜ |
-| Q5 | Token Usage — total `prompt_tokens` used in Q4 | ⬜ |
-
-### Section B — Data Ingestion
-
-| # | Question | Status |
-|---|----------|--------|
-| Q6 | SQLite Ingestion — indexing time in seconds | ⬜ |
-| Q7 | Persistence Validation — identical results after restart? | ⬜ |
-
-### Section C — Agents & Function Calling (Part 2)
-
-| # | Question | Status |
-|---|----------|--------|
-| Q8 | Tool Definition — number of required parameters | ⬜ |
-| Q9 | Function Calling Output — tool name and `query` argument value | ⬜ |
-| Q10 | Agentic Loop Iteration Count — iterations for complex query | ⬜ |
-| Q11 | No-Tool Scenario — does `"Thank you!"` trigger tool call? | ⬜ |
-| Q12 | Safety Limit — behavior with `max_iterations=3` | ⬜ |
-
-### Bonus
-
-| # | Question | Status |
-|---|----------|--------|
-| B1 | Multi-Source Agent — does agent call both tools? | ⬜ |
-| B2 | Agent vs Fixed RAG Comparison — 5 query comparison | ⬜ |
+**Stack:**
+- 🔍 **Search:** `minsearch` (TF-IDF, local, no server needed)
+- 🤖 **LLM:** `deepseek/deepseek-chat-v3-0324:free` via [OpenRouter](https://openrouter.ai)
+- 📦 **Data loader:** `gitsource` (commit `8c1834d` — fixed for reproducibility)
+- 🛠 **Agent:** hand-written tool-calling loop (OpenAI-compatible API)
 
 ---
 
-## 🚀 Setup
+## Questions Covered
+
+| Q | Topic | Key Concept |
+|---|-------|-------------|
+| Q1 | Dataset size | How many lesson pages exist in the course repo |
+| Q2 | Indexing & search | `minsearch` with `content` (text) + `filename` (keyword) |
+| Q3 | RAG | Full-page RAG, measure input tokens |
+| Q4 | Chunking | `size=2000, step=1000` sliding window |
+| Q5 | RAG + chunking | Compare input tokens vs Q3 |
+| Q6 | Agentic RAG | Function-calling loop, count `search` tool invocations |
+
+---
+
+## Setup
+
+### 1. Clone & navigate
 
 ```bash
-# Create virtual environment
-uv venv
-source .venv/bin/activate
+git clone https://github.com/rezkyauliapratama/llm-zoomcamp.git
+cd llm-zoomcamp/homework/01-agentic-rag
+```
 
-# Install dependencies
-uv pip install -r requirements.txt
+### 2. Install dependencies
 
-# Set OpenAI API key
-export OPENAI_API_KEY=your_key_here
+```bash
+pip install -r requirements.txt
+```
 
-# Launch notebook
-jupyter notebook notebook.ipynb
+### 3. Set your OpenRouter API key
+
+Copy the template and fill in your key:
+
+```bash
+cp .env.template .env
+# edit .env and set OPENROUTER_API_KEY=sk-or-...
+```
+
+Or export it directly:
+
+```bash
+export OPENROUTER_API_KEY="sk-or-your-key-here"
+```
+
+> Get a free key at [openrouter.ai/keys](https://openrouter.ai/keys).
+> `deepseek/deepseek-chat-v3-0324:free` has a free tier — no credit card needed.
+
+### 4. Run
+
+```bash
+python homework.py
 ```
 
 ---
 
-## 📦 Dependencies
+## File Structure
 
-See [`requirements.txt`](./requirements.txt).
+```
+homework/01-agentic-rag/
+├── homework.py        # Main script — all 6 questions
+├── minsearch.py       # Local TF-IDF search engine
+├── requirements.txt   # Python dependencies
+├── .env.template      # API key template
+└── README.md          # This file
+```
+
+---
+
+## How It Works
+
+### Data Loading (Q1)
+`gitsource.GithubRepositoryDataReader` pulls all `*.md` files under `/lessons/` at commit `8c1834d`. This pins the dataset so everyone gets the same answers.
+
+### Search (Q2)
+`minsearch.Index` builds an in-memory TF-IDF index. `content` is a text field (tokenized + scored), `filename` is a keyword field (exact match filter). No external services required.
+
+### RAG (Q3)
+Top-5 search results → concatenated context → prompt → LLM. Input token count is read from `response.usage.prompt_tokens`.
+
+### Chunking (Q4–Q5)
+`gitsource.chunk_documents(documents, size=2000, step=1000)` splits long pages into overlapping 2000-char windows with 1000-char steps. Each chunk retains `filename`. Chunked RAG sends fewer tokens per request.
+
+### Agentic Loop (Q6)
+A minimal tool-calling loop built on the OpenAI-compatible API:
+1. System prompt instructs the model to search multiple times before answering
+2. Model returns `tool_calls` → we execute `search()` → append result to messages
+3. Loop continues until the model returns a final text answer (no tool calls)
+4. We count total `search` invocations
+
+---
+
+## Notes
+
+- Token counts (Q3, Q5) may differ slightly from `gpt-5.4-mini` reference answers because DeepSeek uses a different tokenizer. Select the closest option when submitting.
+- The number of agent search calls (Q6) is non-deterministic — the model decides autonomously.
+- The `minsearch.py` bundled here is a self-contained copy for portability.
+
+---
+
+## Submit
+
+https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw1
