@@ -1,8 +1,0 @@
-# Ignore downloaded and processed files - they are large and reproducible
-raw/
-processed/
-*.db
-*.pdf
-
-# Keep metadata and eval data
-!documents_metadata.json

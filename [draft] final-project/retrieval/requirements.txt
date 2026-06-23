@@ -1,6 +1,0 @@
-# Retrieval Layer Dependencies
-sentence-transformers>=2.7.0   # embeddings + reranker
-psycopg2-binary>=2.9.9
-pgvector>=0.3.0
-numpy>=1.26.0
-python-dotenv>=1.0.0

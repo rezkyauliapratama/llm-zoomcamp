@@ -1,9 +1,0 @@
-# Ingestion Pipeline Dependencies
-pymupdf>=1.23.0           # PDF text extraction (fitz)
-langchain-text-splitters>=0.2.0
-sentence-transformers>=2.7.0  # multilingual-e5-base
-psycopg2-binary>=2.9.9
-pgvector>=0.3.0
-requests>=2.31.0
-tqdm>=4.66.0
-python-dotenv>=1.0.0

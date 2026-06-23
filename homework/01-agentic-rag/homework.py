@@ -47,7 +47,11 @@ reader = GithubRepositoryDataReader(
 )
 
 files = reader.read()
-documents = [f.parse() for f in files]
+documents = []
+for file in files:
+    doc = file.parse()
+    documents.append(doc)
+    
 print(f"Q1 - Number of lesson pages: {len(documents)}")
 
 # ---------------------------------------------------------------------------
