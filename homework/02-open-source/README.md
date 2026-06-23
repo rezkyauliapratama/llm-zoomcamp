@@ -1,15 +1,16 @@
-# Homework 2 — Open Source LLMs & Self-Hosting
+# Homework 2 — Open-Source LLMs & Self-Hosting
 
-This homework covers running open-source LLMs locally and integrating them into RAG pipelines.
+## Overview
+This homework covers using open-source LLMs (Ollama, HuggingFace) as alternatives to OpenAI.
 
-## Topics Covered
-- Running LLMs with Ollama
-- Self-hosted LLM alternatives to OpenAI
-- Integrating open-source models into RAG
-- Comparing performance of different models
-
-## Reference
-- [Course Module 2](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/02-open-source)
+## Topics
+- Running open-source LLMs with Ollama
+- Using HuggingFace models for embeddings
+- Replacing OpenAI with local models in RAG pipeline
+- NVIDIA GPU setup for inference
 
 ## Files
-- `homework.ipynb` — Main notebook with solutions
+- `homework.ipynb` — Main notebook with answers
+
+## Reference
+- [LLM Zoomcamp Module 2](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/02-open-source)
