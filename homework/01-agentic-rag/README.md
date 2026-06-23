@@ -1,38 +1,41 @@
-# Homework 1 — Agentic RAG
+# Homework 01 — Agentic RAG
 
-> **LLM Zoomcamp 2026 · Module 01**
-> Reference: [homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)
+> **LLM Zoomcamp 2026 · Module 1**  
+> Course: [DataTalksClub/llm-zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp)  
+> Homework spec: [cohorts/2026/01-agentic-rag/homework.md](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md)
 
 ---
 
 ## Overview
 
-Builds a RAG system over the LLM Zoomcamp course lessons, then evolves it into an agentic pipeline where the LLM decides when and what to search.
+Build a RAG system over the LLM Zoomcamp course lesson pages, then make it agentic. This covers:
 
-**Stack:**
-- 🔍 **Search:** `minsearch` (TF-IDF, local, no server needed)
-- 🤖 **LLM:** `deepseek/deepseek-chat-v3-0324:free` via [OpenRouter](https://openrouter.ai)
-- 📦 **Data loader:** `gitsource` (commit `8c1834d` — fixed for reproducibility)
-- 🛠 **Agent:** hand-written tool-calling loop (OpenAI-compatible API)
+| # | Topic |
+|---|-------|
+| Q1 | Count lesson pages loaded from GitHub |
+| Q2 | Index with `minsearch` and search |
+| Q3 | RAG pipeline (measure input tokens) |
+| Q4 | Chunk documents with `gitsource` |
+| Q5 | RAG with chunked index (compare token counts) |
+| Q6 | Agentic RAG with `toyaikit` (count tool calls) |
 
 ---
 
-## Questions Covered
+## Stack
 
-| Q | Topic | Key Concept |
-|---|-------|-------------|
-| Q1 | Dataset size | How many lesson pages exist in the course repo |
-| Q2 | Indexing & search | `minsearch` with `content` (text) + `filename` (keyword) |
-| Q3 | RAG | Full-page RAG, measure input tokens |
-| Q4 | Chunking | `size=2000, step=1000` sliding window |
-| Q5 | RAG + chunking | Compare input tokens vs Q3 |
-| Q6 | Agentic RAG | Function-calling loop, count `search` tool invocations |
+| Component | Choice |
+|-----------|--------|
+| LLM Provider | [OpenRouter](https://openrouter.ai) |
+| Model | `deepseek/deepseek-chat-v3-0324:free` |
+| Search | `minsearch` (simple in-memory full-text) |
+| Data loader | `gitsource` |
+| Agent framework | `toyaikit` |
 
 ---
 
 ## Setup
 
-### 1. Clone & navigate
+### 1. Clone and navigate
 
 ```bash
 git clone https://github.com/rezkyauliapratama/llm-zoomcamp.git
@@ -45,29 +48,51 @@ cd llm-zoomcamp/homework/01-agentic-rag
 pip install -r requirements.txt
 ```
 
-### 3. Set your OpenRouter API key
+### 3. Set your API key
 
-Copy the template and fill in your key:
-
+**Option A — via `.env`** (recommended):
 ```bash
 cp .env.template .env
-# edit .env and set OPENROUTER_API_KEY=sk-or-...
+# Edit .env and set OPENROUTER_API_KEY=sk-or-v1-...
 ```
 
-Or export it directly:
-
-```bash
-export OPENROUTER_API_KEY="sk-or-your-key-here"
+**Option B — directly in the script**:
+Open `homework.py` and uncomment this line near the top:
+```python
+# API_KEY = "sk-or-v1-YOUR_KEY_HERE"
 ```
 
-> Get a free key at [openrouter.ai/keys](https://openrouter.ai/keys).
-> `deepseek/deepseek-chat-v3-0324:free` has a free tier — no credit card needed.
+Get your API key at [openrouter.ai/keys](https://openrouter.ai/keys).
 
-### 4. Run
+---
+
+## Run
 
 ```bash
 python homework.py
 ```
+
+The script runs all 6 questions sequentially and prints a summary at the end.
+
+---
+
+## Dataset
+
+Lesson pages are fetched directly from the course repository at commit `8c1834d`:
+
+```
+DataTalksClub/llm-zoomcamp @ 8c1834d
+└── {01..07}-*/lessons/*.md
+```
+
+Modules covered:
+- `01-agentic-rag`
+- `02-vector-search`
+- `03-orchestration`
+- `04-evaluation`
+- `05-monitoring`
+- `06-best-practices`
+- `07-project-example`
 
 ---
 
@@ -75,46 +100,17 @@ python homework.py
 
 ```
 homework/01-agentic-rag/
-├── homework.py        # Main script — all 6 questions
-├── minsearch.py       # Local TF-IDF search engine
+├── homework.py        # Main script — runs all Q1–Q6
+├── minsearch.py       # Minimal in-memory search engine
 ├── requirements.txt   # Python dependencies
-├── .env.template      # API key template
+├── .env.template      # API key template (copy to .env)
 └── README.md          # This file
 ```
 
 ---
 
-## How It Works
-
-### Data Loading (Q1)
-`gitsource.GithubRepositoryDataReader` pulls all `*.md` files under `/lessons/` at commit `8c1834d`. This pins the dataset so everyone gets the same answers.
-
-### Search (Q2)
-`minsearch.Index` builds an in-memory TF-IDF index. `content` is a text field (tokenized + scored), `filename` is a keyword field (exact match filter). No external services required.
-
-### RAG (Q3)
-Top-5 search results → concatenated context → prompt → LLM. Input token count is read from `response.usage.prompt_tokens`.
-
-### Chunking (Q4–Q5)
-`gitsource.chunk_documents(documents, size=2000, step=1000)` splits long pages into overlapping 2000-char windows with 1000-char steps. Each chunk retains `filename`. Chunked RAG sends fewer tokens per request.
-
-### Agentic Loop (Q6)
-A minimal tool-calling loop built on the OpenAI-compatible API:
-1. System prompt instructs the model to search multiple times before answering
-2. Model returns `tool_calls` → we execute `search()` → append result to messages
-3. Loop continues until the model returns a final text answer (no tool calls)
-4. We count total `search` invocations
-
----
-
 ## Notes
 
-- Token counts (Q3, Q5) may differ slightly from `gpt-5.4-mini` reference answers because DeepSeek uses a different tokenizer. Select the closest option when submitting.
-- The number of agent search calls (Q6) is non-deterministic — the model decides autonomously.
-- The `minsearch.py` bundled here is a self-contained copy for portability.
-
----
-
-## Submit
-
-https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw1
+- Token counts in Q3 and Q5 may vary slightly depending on the model/provider. Select the closest answer option.
+- For Q6, the number of `search` tool calls depends on the model's behaviour — it varies between runs. Select the closest option.
+- `minsearch.py` is bundled locally for zero-dependency simplicity (no pip install needed for it).

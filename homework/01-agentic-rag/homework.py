@@ -1,88 +1,121 @@
-#!/usr/bin/env python3
 """
-Homework 1 - Agentic RAG
-LLM Zoomcamp 2026 - Module 01
+LLM Zoomcamp 2026 - Homework 01: Agentic RAG
 
-Ref: https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/01-agentic-rag/homework.md
+Requirements:
+    pip install gitsource toyaikit minsearch openai python-dotenv
 
-Model: deepseek/deepseek-chat-v3-0324:free via OpenRouter
+Usage:
+    1. Copy .env.template to .env and set OPENROUTER_API_KEY
+       OR set API_KEY directly in this file (see below)
+    2. Run: python homework.py
 """
 
-import json
 import os
-from openai import OpenAI
+import json
+
+# ==============================================================================
+# API KEY CONFIGURATION
+# Option 1: Set directly here (pure-python, no .env needed)
+# Option 2: Load from .env via python-dotenv
+# ==============================================================================
+# API_KEY = "sk-or-v1-YOUR_KEY_HERE"   # <-- uncomment and set your key here
+
+# If API_KEY is not set above, try loading from .env
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+
+# OpenRouter config
+BASE_URL = "https://openrouter.ai/api/v1"
+MODEL = "deepseek/deepseek-chat-v3-0324:free"  # deepseek-v3-flash on openrouter
+
+# ==============================================================================
+# STEP 1 — Load dataset from GitHub
+# ==============================================================================
+
+print("=" * 60)
+print("Q1. Loading lesson pages from GitHub...")
+print("=" * 60)
+
 from gitsource import GithubRepositoryDataReader, chunk_documents
-from minsearch import Index
 
-# ============================================================
-# CONFIG - provide your OpenRouter API key here or via .env
-# ============================================================
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
-
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=OPENROUTER_API_KEY,
+reader = GithubRepositoryDataReader(
+    repo_owner="DataTalksClub",
+    repo_name="llm-zoomcamp",
+    commit_id="8c1834d",
+    allowed_extensions={"md"},
+    filename_filter=lambda path: "/lessons/" in path,
 )
 
-MODEL = "deepseek/deepseek-chat-v3-0324:free"
+files = reader.read()
+
+documents = []
+for file in files:
+    doc = file.parse()
+    documents.append(doc)
+
+print(f"Q1 Answer: Total lesson pages = {len(documents)}")
+
+# ==============================================================================
+# STEP 2 — Index with minsearch and search
+# ==============================================================================
+
+print("\n" + "=" * 60)
+print("Q2. Indexing with minsearch...")
+print("=" * 60)
+
+from minsearch import Index
+
+index = Index(
+    text_fields=["content"],
+    keyword_fields=["filename"],
+)
+index.fit(documents)
+
+query_q2 = "How does the agentic loop keep calling the model until it stops?"
+results_q2 = index.search(query=query_q2, num_results=5)
+
+print(f"Q2 Answer: First result filename = {results_q2[0]['filename']}")
+print(f"Top 3 results:")
+for r in results_q2[:3]:
+    print(f"  - {r['filename']}")
+
+# ==============================================================================
+# STEP 3 — RAG (full documents, no chunking)
+# ==============================================================================
+
+print("\n" + "=" * 60)
+print("Q3. RAG with full documents...")
+print("=" * 60)
+
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=API_KEY,
+    base_url=BASE_URL,
+)
 
 
-# ============================================================
-# STEP 1: LOAD DATASET
-# ============================================================
-def load_documents():
-    print("Loading lesson pages from GitHub (commit 8c1834d)...")
-    reader = GithubRepositoryDataReader(
-        repo_owner="DataTalksClub",
-        repo_name="llm-zoomcamp",
-        commit_id="8c1834d",
-        allowed_extensions={"md"},
-        filename_filter=lambda path: "/lessons/" in path,
-    )
-    files = reader.read()
-    documents = [file.parse() for file in files]
-    print(f"Q1 - Number of lesson pages: {len(documents)}")
-    return documents
-
-
-# ============================================================
-# STEP 2: INDEX & SEARCH (Q2)
-# ============================================================
-def build_index(documents):
-    index = Index(text_fields=["content"], keyword_fields=["filename"])
-    index.fit(documents)
-    return index
-
-
-def q2_search(index):
-    query = "How does the agentic loop keep calling the model until it stops?"
-    results = index.search(query, num_results=5)
-    print(f"Q2 - First result filename: {results[0]['filename']}")
-    return results
-
-
-# ============================================================
-# STEP 3: RAG (Q3)
-# ============================================================
-def build_context(results):
+def build_context(search_results):
     context_parts = []
-    for doc in results:
-        context_parts.append(f"Filename: {doc['filename']}\n\n{doc['content']}")
-    return "\n\n---\n\n".join(context_parts)
+    for doc in search_results:
+        context_parts.append(
+            f"File: {doc['filename']}\n"
+            f"Content:\n{doc['content']}\n"
+        )
+    return "\n---\n".join(context_parts)
 
 
-def llm(prompt):
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response
-
-
-def rag(query, index, num_results=5):
-    results = index.search(query, num_results=num_results)
+def rag(query, search_index, num_results=5):
+    results = search_index.search(query=query, num_results=num_results)
     context = build_context(results)
-    prompt = f"""Answer the question based on the context below.
+
+    prompt = f"""You are a helpful course teaching assistant.
+Answer the question based on the context below.
 
 Context:
 {context}
@@ -90,156 +123,112 @@ Context:
 Question: {query}
 
 Answer:"""
-    response = llm(prompt)
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[{"role": "user", "content": prompt}],
+    )
+
     answer = response.choices[0].message.content
-    usage = response.usage
-    return answer, usage
+    input_tokens = response.usage.prompt_tokens
+    return answer, input_tokens
 
 
-def q3_rag(index):
-    query = "How does the agentic loop keep calling the model until it stops?"
-    answer, usage = rag(query, index)
-    print(f"Q3 - RAG Answer:\n{answer}")
-    print(f"Q3 - Input (prompt) tokens: {usage.prompt_tokens}")
-    return usage.prompt_tokens
+answer_q3, tokens_q3 = rag(query_q2, index)
+print(f"Q3 Answer (input tokens): {tokens_q3}")
+print(f"RAG answer preview: {answer_q3[:200]}...")
 
+# ==============================================================================
+# STEP 4 — Chunking
+# ==============================================================================
 
-# ============================================================
-# STEP 4: CHUNKING (Q4)
-# ============================================================
-def q4_chunking(documents):
-    chunks = chunk_documents(documents, size=2000, step=1000)
-    print(f"Q4 - Number of chunks: {len(chunks)}")
-    return chunks
+print("\n" + "=" * 60)
+print("Q4. Chunking documents...")
+print("=" * 60)
 
+chunks = chunk_documents(documents, size=2000, step=1000)
+print(f"Q4 Answer: Total chunks = {len(chunks)}")
 
-# ============================================================
-# STEP 5: RAG WITH CHUNKING (Q5)
-# ============================================================
-def q5_rag_with_chunks(chunks, q3_tokens):
-    chunk_index = build_index(chunks)
-    query = "How does the agentic loop keep calling the model until it stops?"
-    answer, usage = rag(query, chunk_index)
-    print(f"Q5 - RAG with chunks answer:\n{answer}")
-    print(f"Q5 - Input tokens (chunked): {usage.prompt_tokens}")
-    ratio = q3_tokens / usage.prompt_tokens if usage.prompt_tokens else 0
-    print(f"Q5 - Token ratio (full vs chunked): {ratio:.1f}x fewer with chunks")
-    return chunk_index
+# ==============================================================================
+# STEP 5 — RAG with chunking
+# ==============================================================================
 
+print("\n" + "=" * 60)
+print("Q5. RAG with chunked index...")
+print("=" * 60)
 
-# ============================================================
-# STEP 6: AGENTIC RAG (Q6)
-# ============================================================
-def q6_agent(chunk_index):
-    search_calls = [0]  # mutable counter
+chunk_index = Index(
+    text_fields=["content"],
+    keyword_fields=["filename"],
+)
+chunk_index.fit(chunks)
+
+answer_q5, tokens_q5 = rag(query_q2, chunk_index)
+print(f"Q5 Answer (input tokens with chunks): {tokens_q5}")
+print(f"Reduction vs Q3: {tokens_q3} -> {tokens_q5} tokens")
+if tokens_q5 > 0:
+    ratio = tokens_q3 / tokens_q5
+    print(f"Ratio: {ratio:.1f}x fewer tokens")
+
+# ==============================================================================
+# STEP 6 — Agentic RAG with toyaikit
+# ==============================================================================
+
+print("\n" + "=" * 60)
+print("Q6. Agentic RAG with toyaikit...")
+print("=" * 60)
+
+try:
+    from toyaikit import Agent, Tool
+
+    search_call_count = 0
 
     def search(query: str) -> str:
         """
-        Search the LLM Zoomcamp course lessons.
-        Use this to look up information about RAG, agents, evaluation, monitoring, and best practices.
+        Search the LLM Zoomcamp course lessons for information about a given topic.
+        Returns relevant lesson content as a string.
 
         Args:
-            query: The search query string
-
-        Returns:
-            Relevant lesson content as a string
+            query: The search query string to look up in the course materials
         """
-        search_calls[0] += 1
-        results = chunk_index.search(query, num_results=3)
-        parts = [f"[{r['filename']}]\n{r['content']}" for r in results]
-        return "\n\n---\n\n".join(parts)
+        global search_call_count
+        search_call_count += 1
+        results = chunk_index.search(query=query, num_results=3)
+        return build_context(results)
 
-    tools = [
-        {
-            "type": "function",
-            "function": {
-                "name": "search",
-                "description": search.__doc__,
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "query": {
-                            "type": "string",
-                            "description": "The search query string",
-                        }
-                    },
-                    "required": ["query"],
-                },
-            },
-        }
-    ]
-
-    system_prompt = (
-        "You're a course teaching assistant. Answer the student's question using the "
-        "search tool. Make multiple searches with different keywords before answering."
+    agent = Agent(
+        client=client,
+        model=MODEL,
+        system="""
+You're a course teaching assistant. Answer the student's question using the
+search tool. Make multiple searches with different keywords before answering.
+""".strip(),
+        tools=[Tool(search)],
     )
-    user_question = "How does the agentic loop work, and how is it different from plain RAG?"
 
-    messages = [
-        {"role": "system", "content": system_prompt},
-        {"role": "user", "content": user_question},
-    ]
+    agent_query = "How does the agentic loop work, and how is it different from plain RAG?"
+    agent_answer = agent.run(agent_query)
 
-    print("Q6 - Running agentic loop...")
-    while True:
-        response = client.chat.completions.create(
-            model=MODEL,
-            messages=messages,
-            tools=tools,
-            tool_choice="auto",
-        )
+    print(f"Q6 Answer: Agent called search {search_call_count} time(s)")
+    print(f"Agent answer preview: {str(agent_answer)[:300]}...")
 
-        msg = response.choices[0].message
-        messages.append(msg)
+except ImportError:
+    print("toyaikit not installed. Run: pip install toyaikit")
+    print("Skipping Q6.")
 
-        if not msg.tool_calls:
-            # Model stopped calling tools -> final answer
-            print(f"Q6 - Final answer:\n{msg.content}")
-            break
+# ==============================================================================
+# SUMMARY
+# ==============================================================================
 
-        for tool_call in msg.tool_calls:
-            func_name = tool_call.function.name
-            args = json.loads(tool_call.function.arguments)
-            print(f"  -> Tool call: {func_name}(query='{args['query']}'")
-            result = search(**args)
-            messages.append({
-                "role": "tool",
-                "tool_call_id": tool_call.id,
-                "content": result,
-            })
-
-    print(f"Q6 - Number of search tool calls: {search_calls[0]}")
-    return search_calls[0]
-
-
-# ============================================================
-# MAIN
-# ============================================================
-if __name__ == "__main__":
-    print("=" * 60)
-    print("LLM Zoomcamp 2026 - Homework 1: Agentic RAG")
-    print(f"Model: {MODEL} via OpenRouter")
-    print("=" * 60)
-
-    # Q1
-    documents = load_documents()
-
-    # Q2
-    index = build_index(documents)
-    q2_search(index)
-
-    # Q3
-    q3_tokens = q3_rag(index)
-
-    # Q4
-    chunks = q4_chunking(documents)
-
-    # Q5
-    chunk_index = q5_rag_with_chunks(chunks, q3_tokens)
-
-    # Q6
-    q6_agent(chunk_index)
-
-    print("\n" + "=" * 60)
-    print("All questions answered!")
-    print("=" * 60)
+print("\n" + "=" * 60)
+print("HOMEWORK ANSWERS SUMMARY")
+print("=" * 60)
+print(f"Q1. Number of lesson pages     : {len(documents)}")
+print(f"Q2. First result filename       : {results_q2[0]['filename']}")
+print(f"Q3. Input tokens (no chunking)  : {tokens_q3}")
+print(f"Q4. Number of chunks            : {len(chunks)}")
+print(f"Q5. Input tokens (with chunks)  : {tokens_q5}")
+try:
+    print(f"Q6. Search tool calls by agent  : {search_call_count}")
+except NameError:
+    print("Q6. Skipped (toyaikit not installed)")
