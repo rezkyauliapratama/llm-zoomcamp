@@ -4,11 +4,12 @@ Homework 1 - Agentic RAG
 LLM Zoomcamp 2026 - Cohort 01-agentic-rag
 
 Dataset : DataTalksClub/llm-zoomcamp @ commit 8c1834d (lessons/*.md)
-Model   : deepseek/deepseek-chat-v4-flash via OpenRouter
+Model   : deepseek/deepseek-v4-flash via OpenRouter
 Search  : minsearch (local, no server needed)
 """
 
 import os
+from dotenv import load_dotenv   # ← TAMBAHKAN BARIS INI
 from dataclasses import dataclass
 from openai import OpenAI
 from gitsource import GithubRepositoryDataReader, chunk_documents
@@ -17,10 +18,14 @@ from minsearch import Index
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-# TODO: put your key here, or set the OPENROUTER_API_KEY environment variable
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 
-MODEL = "deepseek/deepseek-chat-v4-flash"
+load_dotenv()  # ← load .env SEBELUM os.getenv()
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+if not OPENROUTER_API_KEY:
+    raise ValueError("OPENROUTER_API_KEY is not set. Add it to .env file.")  # ← fail 
+
+MODEL = "deepseek/deepseek-v4-flash"
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 client = OpenAI(
