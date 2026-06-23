@@ -4,16 +4,17 @@ Homework 1 - Agentic RAG
 LLM Zoomcamp 2026 - Cohort 01-agentic-rag
 
 Dataset : DataTalksClub/llm-zoomcamp @ commit 8c1834d (lessons/*.md)
-Model   : openai/gpt-4.1-mini via OpenRouter (OpenAI gpt-5.4-mini equivalent)
+Model   : openai/gpt-4.1-mini via OpenRouter
 Search  : minsearch (local, no server needed)
 """
 
 import os
+import json
 from dotenv import load_dotenv
 from openai import OpenAI
 from gitsource import GithubRepositoryDataReader, chunk_documents
 from minsearch import Index
-from rag_helper import RAGBase  # <- uses adapted RAGBase from DataTalksClub
+from rag_helper import RAGBase
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -25,7 +26,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 if not OPENROUTER_API_KEY:
     raise ValueError("OPENROUTER_API_KEY is not set. Add it to .env file.")
 
-MODEL = "openai/gpt-4.1-mini"  # gpt-5.4-mini via OpenRouter
+MODEL = "openai/gpt-4.1-mini"  # gpt-5.4-mini equivalent via OpenRouter
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 client = OpenAI(
@@ -47,7 +48,6 @@ reader = GithubRepositoryDataReader(
 
 files = reader.read()
 documents = [f.parse() for f in files]
-
 print(f"Q1 - Number of lesson pages: {len(documents)}")
 
 # ---------------------------------------------------------------------------
@@ -62,7 +62,7 @@ results = doc_index.search(Q2_QUERY, num_results=5)
 print(f"Q2 - Filename of first result: {results[0]['filename']}")
 
 # ---------------------------------------------------------------------------
-# Step 3 - RAG over full-document index (using RAGBase from rag_helper)
+# Step 3 - RAG over full-document index
 # ---------------------------------------------------------------------------
 print("\n[3] Running RAG over full-document index...")
 
@@ -94,43 +94,88 @@ ratio = q3_result.input_tokens / max(q5_result.input_tokens, 1)
 print(f"     Ratio full/chunked: {ratio:.1f}x fewer tokens with chunking")
 
 # ---------------------------------------------------------------------------
-# Step 6 - Agentic RAG with toyaikit
+# Step 6 - Agentic RAG (hand-written loop, OpenRouter-compatible)
 # ---------------------------------------------------------------------------
-print("\n[6] Building agentic RAG with toyaikit...")
-try:
-    from toyaikit import Agent, tool
+print("\n[6] Building agentic RAG (hand-written loop)...")
 
-    search_call_count = 0
+search_call_count = 0
 
-    @tool
-    def search(query: str) -> str:
-        """Search the LLM Zoomcamp course lessons for information.
-        Use specific keywords related to the topic you want to learn about.
-        """
-        global search_call_count
-        search_call_count += 1
-        # reuse RAGBase.search + build_context from rag_chunked instance
-        results = rag_chunked.search(query, num_results=3)
-        return rag_chunked.build_context(results)
 
-    agent = Agent(
-        client=client,
+def search(query: str) -> str:
+    """Search the LLM Zoomcamp course lessons for information.
+    Use specific keywords related to the topic you want to learn about.
+    """
+    global search_call_count
+    search_call_count += 1
+    results = rag_chunked.search(query, num_results=3)
+    return rag_chunked.build_context(results)
+
+
+# Tool schema - derived from search() signature + docstring
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search",
+            "description": (
+                "Search the LLM Zoomcamp course lessons for information. "
+                "Use specific keywords related to the topic you want to learn about."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query string",
+                    }
+                },
+                "required": ["query"],
+            },
+        },
+    }
+]
+
+SYSTEM_PROMPT = (
+    "You're a course teaching assistant. "
+    "Answer the student's question using the search tool. "
+    "Make multiple searches with different keywords before answering."
+)
+
+Q6_QUERY = "How does the agentic loop work, and how is it different from plain RAG?"
+
+messages = [
+    {"role": "system", "content": SYSTEM_PROMPT},
+    {"role": "user", "content": Q6_QUERY},
+]
+
+# Agentic loop - same while True pattern as toyaikit internally uses
+while True:
+    response = client.chat.completions.create(
         model=MODEL,
-        tools=[search],
-        system_prompt=(
-            "You're a course teaching assistant. "
-            "Answer the student's question using the search tool. "
-            "Make multiple searches with different keywords before answering."
-        ),
+        messages=messages,
+        tools=TOOLS,
+        tool_choice="auto",
     )
 
-    Q6_QUERY = "How does the agentic loop work, and how is it different from plain RAG?"
-    answer = agent.run(Q6_QUERY)
-    print(f"Q6 - Number of search() calls: {search_call_count}")
-    print(f"     Answer preview: {answer[:200]}...")
+    msg = response.choices[0].message
+    messages.append(msg)
 
-except ImportError:
-    print("toyaikit not installed. Run: pip install toyaikit")
-    print("Skipping Q6.")
+    # No tool calls - model is done, final answer ready
+    if not msg.tool_calls:
+        break
+
+    # Execute every tool call the model requested
+    for tc in msg.tool_calls:
+        args = json.loads(tc.function.arguments)
+        result = search(**args)
+        messages.append({
+            "role": "tool",
+            "tool_call_id": tc.id,
+            "content": result,
+        })
+
+final_answer = messages[-1].content if hasattr(messages[-1], "content") else messages[-1]["content"]
+print(f"Q6 - Number of search() calls: {search_call_count}")
+print(f"     Answer preview: {final_answer[:200]}...")
 
 print("\n- All questions answered!")
