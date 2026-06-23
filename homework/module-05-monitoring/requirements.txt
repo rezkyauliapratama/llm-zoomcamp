@@ -1,0 +1,5 @@
+# Module 05 - Monitoring
+openai>=1.0.0
+psycopg2-binary>=2.9.9
+pandas>=2.0.0
+jupyter>=1.0.0

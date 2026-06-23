@@ -1,19 +1,24 @@
-# LLM Zoomcamp 2026 — Homework
+# Homework
 
-This directory contains homework submissions for all 8 modules of LLM Zoomcamp 2026.
+Folder ini berisi semua submission homework untuk LLM Zoomcamp 2026.
 
-## Module Index
+## Progress Tracker
 
-| Module | Title | Status |
-|--------|-------|--------|
-| [module-01](./module-01/) | Agentic RAG | 🔄 In Progress |
-| [module-02](./module-02/) | Open-Source LLMs | ⏳ Pending |
-| [module-03](./module-03/) | Vector Search & Retrieval | ⏳ Pending |
-| [module-04](./module-04/) | Evaluation | ⏳ Pending |
-| [module-05](./module-05/) | Monitoring | ⏳ Pending |
-| [module-06](./module-06/) | Best Practices | ⏳ Pending |
-| [module-07](./module-07/) | Chunking Strategies | ⏳ Pending |
-| [module-08](./module-08/) | Ingestion Pipelines | ⏳ Pending |
+| Module | Title | Status | Score |
+|--------|-------|--------|-------|
+| [01](./module-01-agentic-rag/) | Agentic RAG | 🔄 In Progress | - |
+| [02](./module-02-open-source-llms/) | Open-Source LLMs | ⏳ Not Started | - |
+| [03](./module-03-vector-search/) | Vector Search & Retrieval | ⏳ Not Started | - |
+| [04](./module-04-evaluation/) | Evaluation | ⏳ Not Started | - |
+| [05](./module-05-monitoring/) | Monitoring | ⏳ Not Started | - |
+| [06](./module-06-best-practices/) | Best Practices | ⏳ Not Started | - |
+| [07](./module-07-chunking/) | Chunking Strategies | ⏳ Not Started | - |
+| [08](./module-08-ingestion-pipelines/) | Ingestion Pipelines | ⏳ Not Started | - |
 
-## Reference
-- [Official Homework Repo](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/cohorts/2026)
+## Conventions
+
+Setiap folder module berisi:
+- `README.md` — ringkasan soal dan setup instructions
+- `notebook.ipynb` — jawaban dalam notebook format
+- `answers.md` — jawaban final yang di-submit
+- `requirements.txt` — pinned dependencies per module

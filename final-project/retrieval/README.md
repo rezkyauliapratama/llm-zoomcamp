@@ -1,38 +1,50 @@
 # Retrieval Layer
 
-Hybrid search pipeline combining dense (vector) and sparse (keyword) retrieval with RRF fusion and cross-encoder reranking.
+Hybrid retrieval dengan RRF fusion dan cross-encoder reranking.
 
 ## Architecture
 
 ```
 User Query
     ↓
-Query Rewriter (LLM) → expands abbreviations, adds regulatory context
-    ↓                      ↓
-PGVector Search      PostgreSQL FTS (tsvector)
-(dense/vector)       (sparse/keyword)
-    ↓                      ↓
-         RRF Fusion (k=60)
-              ↓
-    Cross-Encoder Reranker
-    (top-10 → top-5)
-              ↓
-    Retrieved Chunks with scores
+Query Rewriter (LLM) — expands abbreviations, adds regulatory context
+    ↓              ↓
+Vector Search    Keyword Search
+(PGVector)       (PostgreSQL FTS)
+    ↓              ↓
+    ← RRF Fusion (k=60) →
+         ↓
+  Cross-Encoder Reranker (top-5)
+         ↓
+  Final ranked chunks → LLM
 ```
 
-## Components
+## Files
 
-- `hybrid_search.py` — RRF fusion of vector + keyword results
-- `reranker.py` — Cross-encoder reranking (`cross-encoder/ms-marco-MiniLM-L-6-v2`)
-- `query_rewriter.py` — LLM-based query expansion for regulatory queries
+```
+retrieval/
+├── README.md
+├── vector_search.py          ← PGVector cosine similarity search
+├── keyword_search.py         ← PostgreSQL FTS (tsvector) search
+├── rrf_fusion.py             ← Reciprocal Rank Fusion implementation
+├── reranker.py               ← Cross-encoder reranking
+├── query_rewriter.py         ← LLM-based query expansion
+└── pipeline.py               ← Full retrieval pipeline (compose all above)
+```
 
-## Search Configuration
+## RRF Formula
 
-| Parameter | Value | Notes |
+For each document `d` across `n` ranked lists:
+
+```
+RRF_score(d) = Σ 1 / (k + rank(d))
+```
+
+where `k=60` is the smoothing constant.
+
+## Models
+
+| Component | Model | Notes |
 |-----------|-------|-------|
-| Vector Top K | 10 | PGVector cosine similarity |
-| FTS Top K | 10 | PostgreSQL tsvector BM25-like |
-| RRF k constant | 60 | Standard smoothing constant |
-| Reranker Top K | 5 | Final chunks passed to LLM |
-| Embedding model | `intfloat/multilingual-e5-base` | 768-dim, bilingual |
-| Vector index | HNSW (m=16, ef=64) | Fast ANN search |
+| Embeddings | `intfloat/multilingual-e5-base` | 768-dim; Bahasa Indonesia + English |
+| Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Fast; swap to Cohere Rerank for production |

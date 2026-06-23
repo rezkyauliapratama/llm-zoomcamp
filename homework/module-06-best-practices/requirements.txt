@@ -1,0 +1,4 @@
+# Module 06 - Best Practices
+openai>=1.0.0
+sentence-transformers>=2.7.0
+jupyter>=1.0.0
