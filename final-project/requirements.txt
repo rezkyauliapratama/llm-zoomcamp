@@ -1,0 +1,30 @@
+# Core
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# LLM & Embeddings
+openai>=1.30.0
+sentence-transformers>=3.0.0
+# groq>=0.9.0  # Uncomment if using Groq
+
+# Vector Store
+psycopg2-binary>=2.9.9
+pgvector>=0.2.4
+
+# PDF Parsing
+pdfplumber>=0.11.0
+# tika>=2.6.0  # Uncomment for OCR/scanned PDFs
+
+# Data Processing
+pandas>=2.1.0
+numpy>=1.26.0
+
+# Evaluation
+scikit-learn>=1.4.0
+
+# Monitoring
+psycopg2-binary>=2.9.9  # Already listed above
+
+# Notebooks
+jupyterlab>=4.0.0
+plotly>=5.20.0

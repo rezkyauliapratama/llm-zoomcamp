@@ -1,0 +1,16 @@
+# Homework 01 - Agentic RAG
+# Pin versions for reproducibility
+
+openai>=1.30.0
+requests>=2.31.0
+jupyter>=1.0.0
+notebook>=7.0.0
+ipykernel>=6.25.0
+tqdm>=4.66.0
+
+# minsearch - in-memory keyword search
+# Install from: pip install minsearch
+# or copy minsearch.py from DataTalksClub repo
+
+# sqlitesearch - persistent keyword search
+# Available in the course repo

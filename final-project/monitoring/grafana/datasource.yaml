@@ -1,0 +1,19 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    type: postgres
+    url: postgres:5432
+    database: ${POSTGRES_DB:-regulatory_rag}
+    user: ${POSTGRES_USER:-rag_user}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD:-change_me}
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 2
+      connMaxLifetime: 14400
+      postgresVersion: 1700
+      timescaledb: false
+    isDefault: true
+    editable: false

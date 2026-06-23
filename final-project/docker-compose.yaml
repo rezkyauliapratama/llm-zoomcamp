@@ -1,0 +1,106 @@
+# =============================================================================
+# LLM Zoomcamp 2026 — Final Project Docker Compose
+# Services: Open WebUI + N8N + PostgreSQL/pgvector + Grafana
+# =============================================================================
+
+version: "3.8"
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL + pgvector — Vector store & conversation logging
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: rag_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-regulatory_rag}
+      POSTGRES_USER: ${POSTGRES_USER:-rag_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./monitoring/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-rag_user} -d ${POSTGRES_DB:-regulatory_rag}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Open WebUI — Chat interface
+  # ---------------------------------------------------------------------------
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: rag_open_webui
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${OPEN_WEBUI_PORT:-3000}:8080"
+    environment:
+      WEBUI_SECRET_KEY: ${OPEN_WEBUI_SECRET_KEY:-change_me}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - open_webui_data:/app/backend/data
+
+  # ---------------------------------------------------------------------------
+  # N8N — Ingestion pipeline & RAG orchestration
+  # ---------------------------------------------------------------------------
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: rag_n8n
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-change_me}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-change_me}
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-regulatory_rag}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-rag_user}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./ingestion/n8n_workflow.json:/data/workflows/ingestion_workflow.json
+
+  # ---------------------------------------------------------------------------
+  # Grafana — Monitoring dashboard
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: rag_grafana
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-change_me}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./monitoring/grafana/dashboard.json:/etc/grafana/provisioning/dashboards/dashboard.json
+
+volumes:
+  postgres_data:
+  open_webui_data:
+  n8n_data:
+  grafana_data:
+
+networks:
+  default:
+    name: rag_network

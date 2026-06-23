@@ -1,0 +1,66 @@
+[
+  {
+    "id": "panduan-ai-2025",
+    "name": "Panduan Tata Kelola AI Perbankan Indonesia (2025)",
+    "source_url": "https://ojk.go.id",
+    "document_type": "Panduan",
+    "tahun_terbit": "2025",
+    "estimated_pages": 80,
+    "language": "id",
+    "status": "pending_download"
+  },
+  {
+    "id": "banking-booklet-2025",
+    "name": "Indonesia Banking Booklet 2025",
+    "source_url": "https://ojk.go.id",
+    "document_type": "Statistik",
+    "tahun_terbit": "2025",
+    "estimated_pages": 150,
+    "language": "id",
+    "status": "pending_download"
+  },
+  {
+    "id": "pojk-11-2022",
+    "name": "POJK No. 11/POJK.03/2022",
+    "source_url": "https://ojk.go.id",
+    "document_type": "POJK",
+    "topik": "Teknologi Informasi",
+    "tahun_terbit": "2022",
+    "estimated_pages": 60,
+    "language": "id",
+    "status": "pending_download"
+  },
+  {
+    "id": "pojk-18-2023",
+    "name": "POJK No. 18/POJK.03/2023",
+    "source_url": "https://ojk.go.id",
+    "document_type": "POJK",
+    "topik": "Manajemen Risiko",
+    "tahun_terbit": "2023",
+    "estimated_pages": 90,
+    "language": "id",
+    "status": "pending_download"
+  },
+  {
+    "id": "se-ojk-risiko-ti",
+    "name": "SE OJK tentang Manajemen Risiko TI",
+    "source_url": "https://ojk.go.id",
+    "document_type": "SE OJK",
+    "topik": "Manajemen Risiko TI",
+    "tahun_terbit": "2023",
+    "estimated_pages": 40,
+    "language": "id",
+    "status": "pending_download"
+  },
+  {
+    "id": "pbi-gwm-latest",
+    "name": "Peraturan BI - GWM dan Sistem Pembayaran",
+    "source_url": "https://bi.go.id",
+    "document_type": "PBI",
+    "topik": "GWM, Sistem Pembayaran",
+    "tahun_terbit": "2024",
+    "estimated_pages": 30,
+    "language": "id",
+    "status": "pending_download"
+  }
+]
