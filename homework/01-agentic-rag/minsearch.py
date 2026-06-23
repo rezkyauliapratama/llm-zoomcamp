@@ -1,56 +1,63 @@
-"""
-Minimal in-memory full-text search engine.
-Source: https://github.com/alexeygrigorev/minsearch
-"""
-
-import re
+import math
 from collections import defaultdict
 
 
 class Index:
+    """Minimal full-text + keyword search index."""
+
     def __init__(self, text_fields, keyword_fields):
         self.text_fields = text_fields
         self.keyword_fields = keyword_fields
         self.docs = []
-        self.index = defaultdict(lambda: defaultdict(list))
-        self.keyword_index = defaultdict(lambda: defaultdict(list))
+        self.index = defaultdict(lambda: defaultdict(list))  # term -> field -> [doc_ids]
 
     def fit(self, docs):
         self.docs = docs
-        self.index = defaultdict(lambda: defaultdict(list))
-        self.keyword_index = defaultdict(lambda: defaultdict(list))
-
-        for doc_id, doc in enumerate(docs):
+        for idx, doc in enumerate(docs):
             for field in self.text_fields:
                 text = doc.get(field, "")
-                tokens = self._tokenize(text)
-                for token in tokens:
-                    self.index[field][token].append(doc_id)
-
-            for field in self.keyword_fields:
-                value = doc.get(field, "")
-                self.keyword_index[field][value].append(doc_id)
-
+                for token in self._tokenize(text):
+                    self.index[token][field].append(idx)
         return self
 
-    def search(self, query, filter_dict=None, boost_dict=None, num_results=10):
-        tokens = self._tokenize(query)
+    def _tokenize(self, text):
+        return text.lower().split()
+
+    def _score(self, query_tokens, field, boost):
         scores = defaultdict(float)
+        field_index = {token: self.index.get(token, {}).get(field, []) for token in query_tokens}
+        total_docs = len(self.docs)
+        for token, doc_ids in field_index.items():
+            if not doc_ids:
+                continue
+            idf = math.log((total_docs - len(doc_ids) + 0.5) / (len(doc_ids) + 0.5) + 1)
+            tf_counts = defaultdict(int)
+            for did in doc_ids:
+                tf_counts[did] += 1
+            for did, tf in tf_counts.items():
+                scores[did] += boost * idf * (tf / (tf + 1.5))
+        return scores
 
+    def search(self, query, filter_dict=None, boost_dict=None, num_results=10):
+        query_tokens = self._tokenize(query)
+        boost_dict = boost_dict or {f: 1.0 for f in self.text_fields}
+
+        total_scores = defaultdict(float)
         for field in self.text_fields:
-            boost = (boost_dict or {}).get(field, 1.0)
-            for token in tokens:
-                for doc_id in self.index[field].get(token, []):
-                    scores[doc_id] += boost
+            boost = boost_dict.get(field, 1.0)
+            field_scores = self._score(query_tokens, field, boost)
+            for did, s in field_scores.items():
+                total_scores[did] += s
 
+        # Apply keyword filters
         if filter_dict:
-            for field, value in filter_dict.items():
-                allowed = set(self.keyword_index[field].get(value, []))
-                scores = {doc_id: score for doc_id, score in scores.items() if doc_id in allowed}
+            filtered = []
+            for did, score in total_scores.items():
+                doc = self.docs[did]
+                if all(doc.get(k) == v for k, v in filter_dict.items()):
+                    filtered.append((did, score))
+        else:
+            filtered = list(total_scores.items())
 
-        ranked = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        return [self.docs[doc_id] for doc_id, _ in ranked[:num_results]]
-
-    @staticmethod
-    def _tokenize(text):
-        return re.findall(r"\w+", text.lower())
+        filtered.sort(key=lambda x: x[1], reverse=True)
+        return [self.docs[did] for did, _ in filtered[:num_results]]

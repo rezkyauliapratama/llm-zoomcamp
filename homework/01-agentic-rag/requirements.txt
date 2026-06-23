@@ -1,6 +1,4 @@
 gitsource
 toyaikit
-minsearch
 openai
-python-dotenv
-requests
+minsearch
