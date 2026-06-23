@@ -1,24 +1,15 @@
-# Homework
+# LLM Zoomcamp — Homework
 
-Folder ini berisi semua submission homework untuk LLM Zoomcamp 2026.
+This folder contains homework submissions for each module of the [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) course.
 
-## Progress Tracker
+## Modules
 
-| Module | Title | Status | Score |
-|--------|-------|--------|-------|
-| [01](./module-01-agentic-rag/) | Agentic RAG | 🔄 In Progress | - |
-| [02](./module-02-open-source-llms/) | Open-Source LLMs | ⏳ Not Started | - |
-| [03](./module-03-vector-search/) | Vector Search & Retrieval | ⏳ Not Started | - |
-| [04](./module-04-evaluation/) | Evaluation | ⏳ Not Started | - |
-| [05](./module-05-monitoring/) | Monitoring | ⏳ Not Started | - |
-| [06](./module-06-best-practices/) | Best Practices | ⏳ Not Started | - |
-| [07](./module-07-chunking/) | Chunking Strategies | ⏳ Not Started | - |
-| [08](./module-08-ingestion-pipelines/) | Ingestion Pipelines | ⏳ Not Started | - |
-
-## Conventions
-
-Setiap folder module berisi:
-- `README.md` — ringkasan soal dan setup instructions
-- `notebook.ipynb` — jawaban dalam notebook format
-- `answers.md` — jawaban final yang di-submit
-- `requirements.txt` — pinned dependencies per module
+| Module | Topic | Folder |
+|--------|-------|--------|
+| 01 | Introduction & RAG | [01-intro](./01-intro/) |
+| 02 | Open Source LLMs & Self-Hosting | [02-open-source](./02-open-source/) |
+| 03 | Vector Databases & Retrieval | [03-vector-search](./03-vector-search/) |
+| 04 | Evaluation & Monitoring | [04-evaluation](./04-evaluation/) |
+| 05 | Orchestration & LLM Pipelines | [05-orchestration](./05-orchestration/) |
+| 06 | Best Practices | [06-best-practices](./06-best-practices/) |
+| 07 | Agentic RAG | [07-agentic-rag](./07-agentic-rag/) |

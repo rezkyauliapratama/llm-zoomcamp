@@ -1,0 +1,31 @@
+# Core LLM & RAG
+openai>=1.30.0
+langchain>=0.2.0
+langchain-openai>=0.1.0
+ollama>=0.2.0
+
+# Embeddings
+sentence-transformers>=3.0.0
+
+# Vector DB
+qdrant-client>=1.9.0
+
+# Keyword Search
+elasticsearch>=8.13.0
+
+# Document Processing
+pdfplumber>=0.11.0
+beautifulsoup4>=4.12.0
+lxml>=5.2.0
+
+# UI
+streamlit>=1.35.0
+
+# Evaluation & Monitoring
+pandas>=2.2.0
+numpy>=1.26.0
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.66.0
+pyyaml>=6.0
