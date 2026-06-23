@@ -1,5 +1,0 @@
-# Module 07 - Chunking Strategies
-langchain>=0.2.0
-langchain-text-splitters>=0.2.0
-jupyter>=1.0.0
-nltk>=3.8.0
