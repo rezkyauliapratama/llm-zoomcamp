@@ -1,16 +1,19 @@
-# Homework 2 — Open-Source LLMs & Self-Hosting
+# Homework 2 — Open-Source LLMs
 
-## Overview
-This homework covers using open-source LLMs (Ollama, HuggingFace) as alternatives to OpenAI.
+## Module Overview
+Using open-source LLMs locally and via cloud APIs as alternatives to OpenAI.
 
-## Topics
-- Running open-source LLMs with Ollama
-- Using HuggingFace models for embeddings
-- Replacing OpenAI with local models in RAG pipeline
-- NVIDIA GPU setup for inference
+## Topics Covered
+- Running LLMs with Ollama (Phi-3, Llama 3, Mistral)
+- Using HuggingFace models
+- Comparing open-source vs proprietary model outputs
+- GPU acceleration with CUDA
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 2](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/02-open-source)

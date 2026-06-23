@@ -1,16 +1,19 @@
 # Homework 3 — Vector Search
 
-## Overview
-This homework covers vector databases and semantic search using Elasticsearch and other vector stores.
+## Module Overview
+Semantic search using dense vector embeddings and vector databases.
 
-## Topics
-- Dense vector search with Elasticsearch
-- Generating text embeddings
-- Hybrid search (keyword + semantic)
-- Evaluating retrieval quality (hit rate, MRR)
+## Topics Covered
+- Text embeddings with `sentence-transformers`
+- Vector similarity search with Elasticsearch
+- FAISS for local vector indexing
+- Hybrid search: combining BM25 + vector search
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 3](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/03-vector-search)

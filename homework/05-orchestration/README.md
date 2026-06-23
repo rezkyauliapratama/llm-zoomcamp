@@ -1,16 +1,19 @@
-# Homework 5 — Orchestration (LLM Pipelines)
+# Homework 5 — Orchestration
 
-## Overview
-This homework covers building and orchestrating LLM pipelines using tools like Mage or Prefect.
+## Module Overview
+Building production-grade LLM pipelines with workflow orchestration.
 
-## Topics
+## Topics Covered
 - Pipeline orchestration with Mage AI
-- Automated ingestion & indexing workflows
-- Scheduling and monitoring pipelines
-- Connecting vector stores to orchestration tools
+- Automated data ingestion & chunking
+- Scheduled re-indexing of knowledge bases
+- End-to-end RAG pipeline automation
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 5](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/05-orchestration)

@@ -1,16 +1,19 @@
 # Homework 6 — Best Practices
 
-## Overview
-This homework covers best practices for building production-grade LLM applications.
+## Module Overview
+Production best practices for LLM and RAG systems.
 
-## Topics
-- Hybrid search optimization
-- Document reranking techniques
-- Query expansion and HyDE
-- Document enrichment strategies
+## Topics Covered
+- Prompt engineering & optimization
+- Document chunking strategies
+- Query rewriting & HyDE (Hypothetical Document Embeddings)
+- Guardrails, safety filters, and output validation
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 6](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/06-best-practices)

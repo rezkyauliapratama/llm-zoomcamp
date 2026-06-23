@@ -1,16 +1,20 @@
 # Homework 7 — Agentic RAG
 
-## Overview
-This homework covers building agentic RAG systems where LLMs can use tools and reason over multiple steps.
+## Module Overview
+Building agentic systems where LLMs can autonomously use tools and reason over multi-step tasks.
 
-## Topics
-- Building agents with tool use
-- LLM function calling
-- Multi-step reasoning workflows
-- Agentic search and retrieval
+## Topics Covered
+- ReAct (Reasoning + Acting) pattern
+- Tool use: search, calculator, code execution
+- Multi-step agent pipelines
+- Function calling with OpenAI API
+- LangChain / LlamaIndex agents
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 7](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/07-agents)

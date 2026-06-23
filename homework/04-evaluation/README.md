@@ -1,16 +1,19 @@
 # Homework 4 — Evaluation & Monitoring
 
-## Overview
-This homework covers evaluating RAG pipelines and monitoring LLM applications in production.
+## Module Overview
+Evaluating RAG system quality and monitoring LLM applications in production.
 
-## Topics
-- Offline evaluation: cosine similarity, LLM-as-judge
-- Generating ground truth datasets
-- Online monitoring with Grafana
-- PostgreSQL for storing evaluation metrics
+## Topics Covered
+- Offline evaluation: ROUGE, BLEU, cosine similarity
+- LLM-as-a-judge evaluation framework
+- Generating ground-truth Q&A datasets
+- Grafana + Prometheus monitoring dashboards
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 4](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/04-monitoring)

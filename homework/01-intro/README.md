@@ -1,16 +1,19 @@
 # Homework 1 — Introduction to LLMs & RAG
 
-## Overview
-This homework covers the fundamentals of LLMs and RAG (Retrieval-Augmented Generation) using OpenAI API and Elasticsearch.
+## Module Overview
+Introduction to LLM-powered Q&A systems using RAG (Retrieval-Augmented Generation) with Elasticsearch and OpenAI.
 
-## Topics
-- Setting up OpenAI API
-- Running Elasticsearch with Docker
-- Building a basic RAG pipeline
-- Searching with Elasticsearch (keyword + semantic)
+## Topics Covered
+- Setting up a simple RAG pipeline
+- Using Elasticsearch for document retrieval
+- Querying OpenAI (GPT-4o-mini) with retrieved context
+- MinSearch as a lightweight alternative to Elasticsearch
 
 ## Files
-- `homework.ipynb` — Main notebook with answers
+| File | Description |
+|------|-------------|
+| `homework.ipynb` | Main homework notebook |
+| `requirements.txt` | Python dependencies |
 
 ## Reference
 - [LLM Zoomcamp Module 1](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/01-intro)

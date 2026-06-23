@@ -1,15 +1,28 @@
 # LLM Zoomcamp — Homework
 
-This folder contains homework submissions for each module of the [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) course.
+This folder contains all homework submissions for the [LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp) course.
 
-## Modules
+## Structure
 
-| Module | Topic | Folder |
-|--------|-------|--------|
-| 01 | Introduction & RAG | [01-intro](./01-intro/) |
-| 02 | Open Source LLMs & Self-Hosting | [02-open-source](./02-open-source/) |
-| 03 | Vector Databases & Retrieval | [03-vector-search](./03-vector-search/) |
-| 04 | Evaluation & Monitoring | [04-evaluation](./04-evaluation/) |
-| 05 | Orchestration & LLM Pipelines | [05-orchestration](./05-orchestration/) |
-| 06 | Best Practices | [06-best-practices](./06-best-practices/) |
-| 07 | Agentic RAG | [07-agentic-rag](./07-agentic-rag/) |
+| Folder | Module | Topics |
+|--------|--------|--------|
+| `01-intro/` | Introduction | RAG basics, Elasticsearch, OpenAI API |
+| `02-open-source/` | Open-Source LLMs | Ollama, HuggingFace, local inference |
+| `03-vector-search/` | Vector Search | Embeddings, FAISS, hybrid search |
+| `04-evaluation/` | Evaluation & Monitoring | ROUGE, LLM-as-judge, Grafana |
+| `05-orchestration/` | Orchestration | Mage AI, pipeline automation |
+| `06-best-practices/` | Best Practices | Prompt engineering, chunking, guardrails |
+| `07-agentic-rag/` | Agentic RAG | ReAct, tool use, function calling |
+
+## How to Run
+
+Each homework folder contains:
+- `README.md` — description and setup instructions
+- `homework.ipynb` — solution notebook
+- `requirements.txt` — Python dependencies
+
+```bash
+cd homework/<module-folder>
+pip install -r requirements.txt
+jupyter notebook homework.ipynb
+```
