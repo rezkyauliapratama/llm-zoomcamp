@@ -1,0 +1,3 @@
+minsearch
+gitsource
+requests

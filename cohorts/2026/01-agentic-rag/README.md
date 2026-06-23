@@ -1,103 +1,92 @@
 # Homework 01 — Agentic RAG
 
-> LLM Zoomcamp 2026 · Module 1
+> LLM Zoomcamp 2026 · Module 01
 
-## Overview
-
-This homework builds a RAG system from scratch over the LLM Zoomcamp course lesson pages, then makes it **agentic** by giving the LLM a `search` tool.
-
-| Component | Choice |
-|-----------|--------|
-| LLM Provider | [OpenRouter](https://openrouter.ai) |
-| Model | `deepseek/deepseek-chat-v3-5` (DeepSeek V3 Flash) |
-| Search | [`minsearch`](https://github.com/alexeygrigorev/minsearch) |
-| Dataset | DataTalksClub/llm-zoomcamp lesson `.md` files · commit `8c1834d` |
+This homework builds a RAG system from scratch using the **course lesson pages** as the knowledge base, then turns it into an agentic system where the LLM decides when and what to search.
 
 ---
 
-## Questions
+## Stack
 
-| # | Question | Approach |
-|---|----------|----------|
-| Q1 | How many lesson pages? | Count docs from `gitsource` reader |
-| Q2 | Filename of first search result | Index with `minsearch`, search query |
-| Q3 | Input tokens for RAG (full docs) | Modified `RAGBase.llm()` exposes `usage` |
-| Q4 | How many chunks? | `chunk_documents(size=2000, step=1000)` |
-| Q5 | Token reduction with chunking? | Compare Q3 vs Q4 prompt tokens |
-| Q6 | How many times did agent call `search`? | OpenAI tool-calling agentic loop |
+| Component | Choice |
+|-----------|--------|
+| **LLM** | `deepseek/deepseek-chat-v3-0324` via [OpenRouter](https://openrouter.ai) |
+| **Search** | [`minsearch`](https://github.com/alexeygrigorev/minsearch) — simple in-memory full-text search |
+| **Dataset** | DataTalksClub/llm-zoomcamp lesson pages @ commit `8c1834d` |
+| **Data loader** | [`gitsource`](https://github.com/alexeygrigorev/gitsource) |
 
 ---
 
 ## Setup
 
-### 1. Clone & enter directory
+### 1. Clone & navigate
 
 ```bash
 git clone https://github.com/rezkyauliapratama/llm-zoomcamp.git
 cd llm-zoomcamp/cohorts/2026/01-agentic-rag
 ```
 
-### 2. Install dependencies
+### 2. Create a virtual environment
 
 ```bash
-pip install openai minsearch gitsource
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
 
-### 3. Set your API key
-
-Copy `.env.template` to `.env` and fill in your key:
+### 3. Install dependencies
 
 ```bash
-cp .env.template .env
+pip install -r requirements.txt
 ```
 
-Then open `.env` and set:
+### 4. Set your OpenRouter API key
 
+Open `homework.py` and paste your key into the `OPENROUTER_API_KEY` variable at the top:
+
+```python
+OPENROUTER_API_KEY = "sk-or-..."
 ```
-OPENROUTER_API_KEY=sk-or-...
-```
 
-**Or** set it directly inside `homework.py` at the `OPENROUTER_API_KEY = "YOUR_OPENROUTER_API_KEY"` line.
+> A `.env.template` is also provided if you prefer environment-variable management later.
 
-### 4. Run
+---
+
+## Run
 
 ```bash
 python homework.py
 ```
 
----
-
-## File Structure
-
-```
-01-agentic-rag/
-├── homework.py          # Main solution script (all 6 questions)
-├── rag_helper.py        # Modified RAGBase for filename/content schema + usage reporting
-├── .env.template        # API key template
-└── README.md            # This file
-```
+The script runs all six questions sequentially and prints the answers.
 
 ---
 
-## Key Modifications to `rag_helper.py`
+## Questions overview
 
-The original `RAGBase` was written for the FAQ schema (`section`/`question`/`answer`). Two changes were made:
-
-1. **`build_context`** — adapted to `filename` + `content` fields from `gitsource`.
-2. **`llm` + `rag`** — now return the full response object so `usage.prompt_tokens` is accessible for Q3 and Q5.
-
-The LLM client is switched from the OpenAI Responses API to **OpenAI Chat Completions** (`chat.completions.create`) to stay compatible with OpenRouter.
-
----
-
-## Notes
-
-- If your answers differ slightly from the official options, pick the closest one — token counts vary by model/provider.
-- The agentic loop (Q6) uses a native OpenAI tool-calling loop instead of `toyaikit`; the result is equivalent.
-- DeepSeek V3 Flash is extremely cost-efficient on OpenRouter (~$0.14/M input tokens as of 2026).
+| # | Topic | Key detail |
+|---|-------|------------|
+| Q1 | Dataset size | Count lesson pages loaded via `gitsource` |
+| Q2 | Indexing & search | First result filename for the agentic-loop query |
+| Q3 | RAG | Input token count when using full document context |
+| Q4 | Chunking | Number of chunks with `size=2000, step=1000` |
+| Q5 | RAG + chunking | Token reduction vs. full-document RAG |
+| Q6 | Agentic loop | Number of `search` tool calls by the LLM agent |
 
 ---
 
-## Submit
+## How the agentic loop works (Q6)
+
+The agent is given a `search` function as a tool. The LLM decides autonomously:
+
+1. Call `search` with a query → get lesson context
+2. Decide whether it has enough information
+3. If not → call `search` again with different keywords
+4. Once satisfied → return the final answer (no more tool calls)
+
+This mirrors the agentic pattern from the module: the LLM drives the loop, unlike plain RAG where search runs exactly once with the raw user query.
+
+---
+
+## Submit results
 
 https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw1
