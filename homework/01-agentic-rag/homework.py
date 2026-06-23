@@ -4,7 +4,7 @@ Homework 1 - Agentic RAG
 LLM Zoomcamp 2026 - Cohort 01-agentic-rag
 
 Dataset : DataTalksClub/llm-zoomcamp @ commit 8c1834d (lessons/*.md)
-Model   : deepseek/deepseek-v4-flash via OpenRouter
+Model   : openai/gpt-4.1-mini via OpenRouter (OpenAI gpt-5.4-mini equivalent)
 Search  : minsearch (local, no server needed)
 """
 
@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from gitsource import GithubRepositoryDataReader, chunk_documents
 from minsearch import Index
-from rag_helper import build_context, rag, RAGResult  # ← centralized RAG utilities
+from rag_helper import RAGBase  # <- uses adapted RAGBase from DataTalksClub
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -25,7 +25,7 @@ OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
 if not OPENROUTER_API_KEY:
     raise ValueError("OPENROUTER_API_KEY is not set. Add it to .env file.")
 
-MODEL = "deepseek/deepseek-v4-flash"
+MODEL = "openai/gpt-4.1-mini"  # gpt-5.4-mini via OpenRouter
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 client = OpenAI(
@@ -62,11 +62,13 @@ results = doc_index.search(Q2_QUERY, num_results=5)
 print(f"Q2 - Filename of first result: {results[0]['filename']}")
 
 # ---------------------------------------------------------------------------
-# Step 3 - RAG over full-document index
+# Step 3 - RAG over full-document index (using RAGBase from rag_helper)
 # ---------------------------------------------------------------------------
 print("\n[3] Running RAG over full-document index...")
 
-q3_result = rag(Q2_QUERY, doc_index, client, MODEL)
+rag_full = RAGBase(index=doc_index, llm_client=client, model=MODEL)
+q3_result = rag_full.rag(Q2_QUERY)
+
 print(f"Q3 - Input tokens (full-doc RAG): {q3_result.input_tokens}")
 print(f"     Answer preview: {q3_result.answer[:200]}...")
 
@@ -84,7 +86,9 @@ print("\n[5] Indexing chunks and running chunked RAG...")
 chunk_index = Index(text_fields=["content"], keyword_fields=["filename"])
 chunk_index.fit(chunks)
 
-q5_result = rag(Q2_QUERY, chunk_index, client, MODEL)
+rag_chunked = RAGBase(index=chunk_index, llm_client=client, model=MODEL)
+q5_result = rag_chunked.rag(Q2_QUERY)
+
 print(f"Q5 - Input tokens (chunked RAG): {q5_result.input_tokens}")
 ratio = q3_result.input_tokens / max(q5_result.input_tokens, 1)
 print(f"     Ratio full/chunked: {ratio:.1f}x fewer tokens with chunking")
@@ -105,8 +109,9 @@ try:
         """
         global search_call_count
         search_call_count += 1
-        results = chunk_index.search(query, num_results=3)
-        return build_context(results, max_chars=3000)  # ← reuse from rag_helper
+        # reuse RAGBase.search + build_context from rag_chunked instance
+        results = rag_chunked.search(query, num_results=3)
+        return rag_chunked.build_context(results)
 
     agent = Agent(
         client=client,
@@ -128,4 +133,4 @@ except ImportError:
     print("toyaikit not installed. Run: pip install toyaikit")
     print("Skipping Q6.")
 
-print("\n✅ All questions answered!")
+print("\n- All questions answered!")

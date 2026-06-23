@@ -1,77 +1,95 @@
 #!/usr/bin/env python3
 """
-rag_helper.py - Reusable RAG utilities for homework/01-agentic-rag
+rag_helper.py - Adapted from DataTalksClub/llm-zoomcamp rag_helper.py
 
-Provides:
-- build_context()  : format minsearch results into a prompt context string
-- RAGResult        : dataclass to hold answer + token usage
-- rag()            : single-turn RAG using minsearch Index + OpenAI-compatible client
+Changes from original:
+- search()       : removed FAQ boost/filter, uses filename/content schema
+- build_context(): uses filename + content fields instead of section/question/answer
+- llm()          : uses chat.completions.create (OpenRouter-compatible) instead of
+                   responses.create; returns full response object for token tracking
+- rag()          : returns (answer, usage) tuple instead of plain string
 """
 
 from dataclasses import dataclass
-from minsearch import Index
 
+INSTRUCTIONS = '''
+Your task is to answer questions from the course participants
+based on the provided context.
 
-def build_context(results: list[dict], max_chars: int = 8000) -> str:
-    """Concatenate search results into a context block, capped at max_chars."""
-    ctx = ""
-    for r in results:
-        ctx += f"## {r['filename']}\n{r['content']}\n\n"
-        if len(ctx) >= max_chars:
-            break
-    return ctx.strip()
+Use the context to find relevant information and provide accurate
+answers. If the answer is not found in the context,
+respond with "I don't know."
+'''
+
+PROMPT_TEMPLATE = '''
+QUESTION: {question}
+
+CONTEXT:
+{context}
+'''.strip()
 
 
 @dataclass
 class RAGResult:
-    """Container for a RAG response with token usage metadata."""
+    """Container for RAG response with token usage."""
     answer: str
     input_tokens: int
     output_tokens: int
 
 
-def rag(
-    query: str,
-    index: Index,
-    client,
-    model: str,
-    num_results: int = 5,
-    max_context_chars: int = 8000,
-) -> RAGResult:
-    """
-    Run a single-turn RAG pipeline.
+class RAGBase:
 
-    Args:
-        query            : User question.
-        index            : Fitted minsearch.Index instance.
-        client           : OpenAI-compatible client (e.g. openai.OpenAI).
-        model            : Model identifier string.
-        num_results      : Number of documents to retrieve.
-        max_context_chars: Max characters to include in the context block.
+    def __init__(
+        self,
+        index,
+        llm_client,
+        instructions=INSTRUCTIONS,
+        prompt_template=PROMPT_TEMPLATE,
+        model='openai/gpt-4.1-mini',  # gpt-5.4-mini via OpenRouter
+    ):
+        self.index = index
+        self.llm_client = llm_client
+        self.instructions = instructions
+        self.prompt_template = prompt_template
+        self.model = model
 
-    Returns:
-        RAGResult with answer text and token counts.
-    """
-    search_results = index.search(query, num_results=num_results)
-    context = build_context(search_results, max_chars=max_context_chars)
+    def search(self, query, num_results=5):
+        """Search using filename/content schema (no FAQ boost/filter)."""
+        return self.index.search(query, num_results=num_results)
 
-    prompt = (
-        "You are a helpful course assistant.\n\n"
-        "Use the context below to answer the question.\n\n"
-        f"Context:\n{context}\n\n"
-        f"Question: {query}"
-    )
+    def build_context(self, search_results):
+        """Build context from filename + content fields."""
+        lines = []
+        for doc in search_results:
+            lines.append(f"## {doc['filename']}")
+            lines.append(doc['content'])
+            lines.append('')
+        return '\n'.join(lines).strip()
 
-    response = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": "You are a helpful course assistant."},
-            {"role": "user", "content": prompt},
-        ],
-    )
+    def build_prompt(self, query, search_results):
+        context = self.build_context(search_results)
+        return self.prompt_template.format(
+            question=query, context=context
+        )
 
-    return RAGResult(
-        answer=response.choices[0].message.content,
-        input_tokens=response.usage.prompt_tokens,
-        output_tokens=response.usage.completion_tokens,
-    )
+    def llm(self, prompt):
+        """Call LLM via chat.completions (OpenRouter-compatible). Returns full response."""
+        response = self.llm_client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {'role': 'system', 'content': self.instructions},
+                {'role': 'user', 'content': prompt},
+            ],
+        )
+        return response
+
+    def rag(self, query) -> RAGResult:
+        """Run full RAG pipeline. Returns RAGResult with answer + token usage."""
+        search_results = self.search(query)
+        prompt = self.build_prompt(query, search_results)
+        response = self.llm(prompt)
+        return RAGResult(
+            answer=response.choices[0].message.content,
+            input_tokens=response.usage.prompt_tokens,
+            output_tokens=response.usage.completion_tokens,
+        )
