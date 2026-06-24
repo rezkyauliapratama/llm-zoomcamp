@@ -1,27 +1,25 @@
 # Homework 02 — Vector Search
 
-## Setup
+## Setup (using uv)
 
 ```bash
-pip install -r requirements.txt
-```
+# Create project and install dependencies
+uv init --no-workspace
+uv add onnxruntime tokenizers numpy tqdm minsearch gitsource
+uv add --dev huggingface-hub jupyter
 
-Download the ONNX model and helper scripts from the course repo:
-
-```bash
-# Download embedder helpers
+# Download embedder helpers from course repo
 curl -sLO https://raw.githubusercontent.com/DataTalksClub/llm-zoomcamp/main/02-vector-search/embed/download.py
 curl -sLO https://raw.githubusercontent.com/DataTalksClub/llm-zoomcamp/main/02-vector-search/embed/embedder.py
 
-# Download the ONNX model
-python download.py
+# Download the ONNX model (Xenova/all-MiniLM-L6-v2)
+uv run python download.py
+
+# Run the solution
+uv run python homework.py
 ```
 
-Run the solution:
-
-```bash
-python homework.py
-```
+> If you don't have `uv` installed, run: `pip install uv` first.
 
 ---
 
