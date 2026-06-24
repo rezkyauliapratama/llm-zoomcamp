@@ -1,16 +1,10 @@
 # Homework 02 — Vector Search
 
-## Setup (using uv)
+## Setup
 
 ```bash
-# Create project and install dependencies
-uv init --no-workspace
-uv add onnxruntime tokenizers numpy tqdm minsearch gitsource
-uv add --dev huggingface-hub jupyter
-
-# Download embedder helpers from course repo
-curl -sLO https://raw.githubusercontent.com/DataTalksClub/llm-zoomcamp/main/02-vector-search/embed/download.py
-curl -sLO https://raw.githubusercontent.com/DataTalksClub/llm-zoomcamp/main/02-vector-search/embed/embedder.py
+# Install dependencies (reads pyproject.toml)
+uv sync
 
 # Download the ONNX model (Xenova/all-MiniLM-L6-v2)
 uv run python download.py
@@ -19,7 +13,7 @@ uv run python download.py
 uv run python homework.py
 ```
 
-> If you don't have `uv` installed, run: `pip install uv` first.
+> Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/#installation).
 
 ---
 
