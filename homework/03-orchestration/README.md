@@ -25,10 +25,10 @@ Homework submission for [LLM Zoomcamp 2026 Cohort](https://github.com/DataTalksC
 |-------------|---------|
 | **Docker** | Docker Desktop or Docker Compose v2 |
 | **Gemini API Key** | From [Google AI Studio](https://aistudio.google.com/app/apikey) — required for flows 1, 2, 4, 5, 6 and AI Copilot |
-| **OpenRouter API Key** | From [OpenRouter](https://openrouter.ai/keys) — required for flow 3 via OpenAI-compatible endpoint |
+| **OpenRouter API Key** | From [OpenRouter](https://openrouter.ai/keys) — required for flow 3 |
 | **Tavily API Key** | From [Tavily](https://tavily.com/) — required for web search in flows 3, 5, 6 |
 
-> **Provider note:** Flows 1, 2, 4, 5, 6 use Gemini directly. Flow 3 (RAG with websearch) uses OpenRouter as an OpenAI-compatible endpoint. The AI Copilot built into Kestra's UI also requires a direct Gemini API key.
+> **Provider note:** Flows 1, 2, 4, 5, 6 use Gemini directly. Flow 3 (RAG with websearch) uses Kestra's native OpenRouter provider (`io.kestra.plugin.ai.provider.OpenRouter`). The AI Copilot built into Kestra's UI also requires a direct Gemini API key.
 
 ---
 
@@ -90,12 +90,12 @@ docker compose down
 |---|------|----------|-------------|
 | 1 | `1_chat_without_rag.yaml` | Gemini | Query Kestra 1.1 features without RAG |
 | 2 | `2_chat_with_rag.yaml` | Gemini | Same query with RAG (ingest + retrieve) |
-| 3 | `3_rag_with_websearch.yaml` | **OpenRouter** (OpenAI) | RAG with live web search via Tavily |
+| 3 | `3_rag_with_websearch.yaml` | **OpenRouter** | RAG with live web search via Tavily |
 | 4 | `4_simple_agent.yaml` | Gemini | Basic AI agent with controllable summary |
 | 5 | `5_web_research_agent.yaml` | Gemini | Autonomous web research agent |
 | 6 | `6_multi_agent_research.yaml` | Gemini | Multi-agent system for company research |
 
-> **Flow 3 differs from the original course:** It uses OpenRouter (`openai/gpt-4o-mini`) instead of direct OpenAI. The `baseUrl: https://openrouter.ai/api/v1` and `apiKey: {{ secret('OPENROUTER_API_KEY') }}` replace the original `SECRET_OPENAI_API_KEY` configuration.
+> **Flow 3 differs from the original course:** It uses Kestra's native `OpenRouter` provider instead of the original OpenAI provider. The provider type is `io.kestra.plugin.ai.provider.OpenRouter` with `baseUrl: https://openrouter.ai/api/v1` and model `openai/gpt-4o-mini`.
 
 ---
 

@@ -63,11 +63,8 @@ echo "  1. Open Kestra UI and click 'Flows'"
 echo "  2. Import each flow from the flows/ directory"
 echo "  3. Or use the API:"
 echo ""
-for flow in flows/*.yaml; do
-    echo "     curl -X POST -u 'admin@kestra.io:Admin1234!' \"
-done
 
-# Show the actual import commands
+# Import flows via Kestra API
 for flow in flows/*.yaml; do
     fname=$(basename "$flow")
     echo "  curl -X POST -u 'admin@kestra.io:Admin1234!'"
