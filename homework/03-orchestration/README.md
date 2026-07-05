@@ -138,10 +138,12 @@ With RAG (Flow 2), the model retrieves the actual release blog post from GitHub,
 Look for the `multilingual_agent` output token count in the logs:
 
 ```
+📊 Token Usage Summary:
+
 Multilingual Agent:
-- Input tokens: ...
-- Output tokens: 60-100  ← this value
-- Total tokens: ...
+- Input tokens: 282
+- Output tokens: 55 <- this value
+- Total tokens: 337
 ```
 
 **Why short range?** A "short" summary (1–2 sentences) naturally produces a compact output. The actual value varies depending on the input text and model response, but stays within this range.
@@ -154,6 +156,14 @@ Multilingual Agent:
 
 **Experiment:** Run `4_simple_agent.yaml` again with `summary_length = long`. Compare the `multilingual_agent` output token count to your result from Q3.
 
+```
+📊 Token Usage Summary:
+
+Multilingual Agent:
+- Input tokens: 282
+- Output tokens: 178 <- this value
+- Total tokens: 460
+```
 **Answer: 2–5× more (approximate).**
 
 **Why this range?** A "long" summary requests 1–3 paragraphs, which naturally expands the output by 2–5× compared to the 1–2 sentence short version. The exact multiplier depends on the input text complexity.
@@ -171,6 +181,21 @@ Multilingual Agent:
 4. Save the flow, then run it with `summary_length = long`
 5. Compare the `english_brevity` output token count to the original 1-sentence version (also with `summary_length = long`)
 
+Original 1 sentence : 
+```
+English Brevity Agent:
+- Input tokens: 193
+- Output tokens: 41 <- this value
+- Total tokens: 234
+```
+
+Updated to 3 sentences : 
+```
+English Brevity Agent:
+- Input tokens: 206
+- Output tokens: 97 <- this value
+- Total tokens: 303
+```
 **Answer: 2–4× more (approximate).**
 
 **Why:** Changing the constraint from 1 sentence to 3 sentences directly increases the output length of the `english_brevity` task. The token count scales roughly linearly with the number of sentences requested.
@@ -222,11 +247,3 @@ The `.env` file contains your plaintext API keys and is excluded from version co
 ### Default Credentials
 Kestra's admin UI uses default credentials (`admin@kestra.io` / `Admin1234!`). Change these via environment variables (`KESTRA_ADMIN_USERNAME`, `KESTRA_ADMIN_PASSWORD`) if deploying to a shared environment.
 
----
-
-## Submission
-
-Submit your answers at:
-[https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw3](https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw3)
-
-Make sure to include a link to your GitHub repository containing the flow files and this README.
