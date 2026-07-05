@@ -1,0 +1,14 @@
+[project]
+name = "llm-zoomcamp-03-orchestration"
+version = "0.1.0"
+description = "Homework Module 03 — AI Orchestration with Kestra"
+requires-python = ">=3.11"
+dependencies = [
+    "pyyaml>=6.0",
+    "requests>=2.31",
+    "python-dotenv>=1.0",
+]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
