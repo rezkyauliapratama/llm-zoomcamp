@@ -20,6 +20,7 @@ Not legal advice — always verify with original source documents.
 llm-zoomcamp/
 └── homework/
     ├── 01-agentic-rag/          # Module 01 — Agentic RAG
+    ├── 02-vector-search/        # Module 02 — Vector Search
     └── 03-orchestration/        # Module 03 — AI Orchestration
 ```
 
@@ -30,7 +31,7 @@ llm-zoomcamp/
 | Module | Title | Homework | Status |
 |--------|-------|----------|--------|
 | 01 | Agentic RAG | [homework/01-agentic-rag](./homework/01-agentic-rag/) | ✅ Done |
-| 02 | Open-Source LLMs | TBD | ⏳ Pending |
+| 02 | Vector Search | [homework/02-vector-search](./homework/02-vector-search/) | ✅ Done |
 | 03 | AI Orchestration (Kestra) | [homework/03-orchestration](./homework/03-orchestration/) | ✅ Done |
 | 04 | TBD | TBD | ⏳ Pending |
 | 05 | TBD | TBD | ⏳ Pending |
@@ -41,6 +42,17 @@ llm-zoomcamp/
 ---
 
 ## 📖 Module Highlights
+
+### Module 02 — Vector Search
+
+Tech stack: **Python 3.11+**, **uv**, **Cohere Embedding**
+
+| File | Description |
+|------|-------------|
+| `download.py` | Download and prepare course documents |
+| `embedder.py` | Generate embeddings using Cohere API |
+| `homework.py` | Homework answers — vector search with SQLite, pgvector |
+| `pyproject.toml` | uv project configuration |
 
 ### Module 03 — AI Orchestration with Kestra
 
