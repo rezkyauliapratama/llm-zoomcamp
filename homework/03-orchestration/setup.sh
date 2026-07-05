@@ -67,8 +67,8 @@ echo "Waiting for Kestra to be ready..."
 MAX_RETRIES=30
 RETRY=0
 while [ $RETRY -lt $MAX_RETRIES ]; do
-    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/ 2>/dev/null || echo "000")
-    if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "302" ]; then
+    HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/health 2>/dev/null || echo "000")
+    if [ "$HTTP_CODE" = "200" ] ; then
         echo "OK Kestra is ready (HTTP $HTTP_CODE)"
         break
     fi
