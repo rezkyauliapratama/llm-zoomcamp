@@ -6,7 +6,7 @@ description: |
   
   Compare this with 2_chat_with_rag.yaml which uses static content ingestion and an embedding store.
   
-  ⚠️ MODIFIED: Uses the native OpenRouter provider instead of direct OpenAI.
+  ⚠️ Uses OpenRouter provider with GPT-5-mini via OpenAI-compatible endpoint.
 
 tasks:
   - id: chat_with_rag_and_websearch_content_retriever
@@ -15,7 +15,7 @@ tasks:
       type: io.kestra.plugin.ai.provider.OpenRouter
       apiKey: "{{ secret('OPENROUTER_API_KEY') }}"
       baseUrl: https://openrouter.ai/api/v1
-      modelName: openai/gpt-4o-mini
+      modelName: openai/gpt-5-mini
     contentRetrievers:
       - type: io.kestra.plugin.ai.retriever.TavilyWebSearch
         apiKey: "{{ secret('TAVILY_API_KEY') }}"
