@@ -206,6 +206,28 @@ Multilingual Agent:
 In regulated industries (banking, healthcare, finance), every step must be auditable, predictable, and deterministic. AI agents are excellent for supporting tasks like research and summarization, but core compliance logic must remain in traditional, auditable workflows.
 
 **Concept tested:** Understanding when to use each approach (traditional workflows, AI Copilot, RAG, AI Agents, multi-agent systems) based on requirements for determinism, compliance, and cost.
+---
+
+## Security Notes
+
+### Docker Socket Exposure
+This setup mounts the Docker socket (`/var/run/docker.sock`) into the Kestra container, which is required for `DockerMcpClient` in Flow 5. This gives the container root-level access to the host Docker daemon.
+
+> **⚠️ This is acceptable for local development but NOT safe for production or multi-tenant environments.**
+
+### Base64 Secrets
+Kestra's internal secret store uses **base64 encoding**, not encryption. API keys are stored as base64-encoded environment variables in the container. Anyone with access to:
+- `docker inspect` output
+- Kestra execution logs (at debug level)
+- The container filesystem
+
+...can decode them back to plaintext. For production, use a proper secret manager (e.g., HashiCorp Vault, AWS Secrets Manager, GCP Secret Manager).
+
+### .env File
+The `.env` file contains your plaintext API keys and is excluded from version control via `.gitignore`. Never commit this file.
+
+### Default Credentials
+Kestra's admin UI uses default credentials (`admin@kestra.io` / `Admin1234!`). Change these via environment variables (`KESTRA_ADMIN_USERNAME`, `KESTRA_ADMIN_PASSWORD`) if deploying to a shared environment.
 
 ---
 

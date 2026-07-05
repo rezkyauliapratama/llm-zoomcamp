@@ -34,6 +34,8 @@ services:
       SECRET_GEMINI_API_KEY: ${SECRET_GEMINI_API_KEY}
       SECRET_TAVILY_API_KEY: ${SECRET_TAVILY_API_KEY}
       SECRET_OPENROUTER_API_KEY: ${SECRET_OPENROUTER_API_KEY}
+      KESTRA_ADMIN_USERNAME: ${KESTRA_ADMIN_USERNAME:-admin@kestra.io}
+      KESTRA_ADMIN_PASSWORD: ${KESTRA_ADMIN_PASSWORD:-Admin1234!}
       KESTRA_CONFIGURATION: |
         datasources:
           postgres:
@@ -44,8 +46,8 @@ services:
         kestra:
           server:
             basicAuth:
-              username: "admin@kestra.io"
-              password: Admin1234!
+              username: "${KESTRA_ADMIN_USERNAME}"
+              password: "${KESTRA_ADMIN_PASSWORD}"
           repository:
             type: postgres
           storage:
@@ -68,4 +70,4 @@ services:
       - "8081:8081"
     depends_on:
       kestra_postgres:
-        condition: service_started
+        condition: service_healthy
