@@ -28,7 +28,7 @@ Homework submission for [LLM Zoomcamp 2026 Cohort](https://github.com/DataTalksC
 | **OpenRouter API Key** | From [OpenRouter](https://openrouter.ai/keys) — required for flow 3 |
 | **Tavily API Key** | From [Tavily](https://tavily.com/) — required for web search in flows 3, 5, 6 |
 
-> **Provider note:** Flows 1, 2, 4, 5, 6 use Gemini directly. Flow 3 (RAG with websearch) uses Kestra's native OpenRouter provider (`io.kestra.plugin.ai.provider.OpenRouter`). The AI Copilot built into Kestra's UI also requires a direct Gemini API key.
+> **Provider note:** Flows 1, 2, 4, 5, 6 use Gemini directly. Flow 3 (RAG with websearch) uses Kestra's native OpenRouter provider (`io.kestra.plugin.ai.provider.OpenRouter`) with GPT-5 Mini. The AI Copilot built into Kestra's UI also requires a direct Gemini API key.
 
 ---
 
@@ -44,16 +44,8 @@ cp .env.template .env
 ### 2. Start Kestra
 
 ```bash
-# Source the env vars and encode secrets as base64
-export GEMINI_API_KEY="your-key"
-export OPENROUTER_API_KEY="your-key"
-export TAVILY_API_KEY="your-key"
-export SECRET_GEMINI_API_KEY=$(echo -n "$GEMINI_API_KEY" | base64)
-export SECRET_OPENROUTER_API_KEY=$(echo -n "$OPENROUTER_API_KEY" | base64)
-export SECRET_TAVILY_API_KEY=$(echo -n "$TAVILY_API_KEY" | base64)
-
-# Start Kestra
-docker compose up -d
+# Or use the automated setup script
+./setup.sh
 ```
 
 ### 3. Access Kestra UI
@@ -90,12 +82,12 @@ docker compose down
 |---|------|----------|-------------|
 | 1 | `1_chat_without_rag.yaml` | Gemini | Query Kestra 1.1 features without RAG |
 | 2 | `2_chat_with_rag.yaml` | Gemini | Same query with RAG (ingest + retrieve) |
-| 3 | `3_rag_with_websearch.yaml` | **OpenRouter** | RAG with live web search via Tavily |
+| 3 | `3_rag_with_websearch.yaml` | **OpenRouter (GPT-5 Mini)** | RAG with live web search via Tavily |
 | 4 | `4_simple_agent.yaml` | Gemini | Basic AI agent with controllable summary |
 | 5 | `5_web_research_agent.yaml` | Gemini | Autonomous web research agent |
 | 6 | `6_multi_agent_research.yaml` | Gemini | Multi-agent system for company research |
 
-> **Flow 3 differs from the original course:** It uses Kestra's native `OpenRouter` provider instead of the original OpenAI provider. The provider type is `io.kestra.plugin.ai.provider.OpenRouter` with `baseUrl: https://openrouter.ai/api/v1` and model `openai/gpt-4o-mini`.
+> **Flow 3 differs from the original course:** It uses Kestra's native `OpenRouter` provider instead of the original OpenAI provider, with `baseUrl: https://openrouter.ai/api/v1` and model `openai/gpt-5-mini`.
 
 ---
 
@@ -206,6 +198,7 @@ Multilingual Agent:
 In regulated industries (banking, healthcare, finance), every step must be auditable, predictable, and deterministic. AI agents are excellent for supporting tasks like research and summarization, but core compliance logic must remain in traditional, auditable workflows.
 
 **Concept tested:** Understanding when to use each approach (traditional workflows, AI Copilot, RAG, AI Agents, multi-agent systems) based on requirements for determinism, compliance, and cost.
+
 ---
 
 ## Security Notes
