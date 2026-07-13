@@ -145,10 +145,10 @@ def rrf(result_lists, k=60, num_results=5):
     ranked = sorted(scores, key=scores.get, reverse=True)
     return [docs[key] for key in ranked[:num_results]]
 
-def hybrid_search(query, k=60):
+def hybrid_search(query, k=60, num_results=5):
     text_results = text_search(query, num_results=10)
     vector_results = vector_search(query, num_results=10)
-    return rrf([text_results, vector_results], k=k)
+    return rrf([text_results, vector_results], k=k, num_results=num_results)
 
 # ---------------------------------------------------------------------------
 # Q2: First result with text search
@@ -224,7 +224,7 @@ k_values = [1, 50, 100, 200]
 results = {}
 for k in k_values:
     def make_hybrid(k_val):
-        return lambda q, nr=5: hybrid_search(q, k=k_val)
+        return lambda q, num_results=5: hybrid_search(q, k=k_val, num_results=num_results)
     metrics = evaluate(make_hybrid(k), ground_truth)
     results[k] = metrics
     print(f"  k={k:>3}: Hit Rate={metrics['hit_rate']:.3f}, MRR={metrics['mrr']:.3f}")
