@@ -21,7 +21,8 @@ llm-zoomcamp/
 └── homework/
     ├── 01-agentic-rag/          # Module 01 — Agentic RAG
     ├── 02-vector-search/        # Module 02 — Vector Search
-    └── 03-orchestration/        # Module 03 — AI Orchestration
+    ├── 03-orchestration/        # Module 03 — AI Orchestration
+    └── 04-evaluation/           # Module 04 — Evaluation
 ```
 
 ---
@@ -33,7 +34,7 @@ llm-zoomcamp/
 | 01 | Agentic RAG | [homework/01-agentic-rag](./homework/01-agentic-rag/) | ✅ Done |
 | 02 | Vector Search | [homework/02-vector-search](./homework/02-vector-search/) | ✅ Done |
 | 03 | AI Orchestration (Kestra) | [homework/03-orchestration](./homework/03-orchestration/) | ✅ Done |
-| 04 | TBD | TBD | ⏳ Pending |
+| 04 | Evaluation | [homework/04-evaluation](./homework/04-evaluation/) | ✅ Done |
 | 05 | TBD | TBD | ⏳ Pending |
 | 06 | TBD | TBD | ⏳ Pending |
 | 07 | TBD | TBD | ⏳ Pending |
@@ -75,3 +76,4 @@ Tech stack: **Kestra v1.3.21**, **PostgreSQL 18**, **Docker Compose**
 
 - [DataTalksClub/llm-zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp)
 - [Course Cohort 2026](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/cohorts/2026)
+\n### Module 04 — Evaluation\n\nTech stack: **Python 3.12+**, **uv**, **OpenAI**, **minsearch**, **gitsource**\n\n| File | Description |\n|------|-------------|\n| `homework.py` | Full evaluation pipeline — Q1 to Q6 |\n| `ground-truth.csv` | 360 labeled questions across 72 course pages |\n| `pyproject.toml` | uv project configuration |\n
