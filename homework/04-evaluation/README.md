@@ -102,10 +102,3 @@ Vector search MRR is 0.64 on this run. Options: 0.35, 0.45, 0.55, 0.65.
 k=1 gives the best MRR (tied with others) and the highest Hit Rate. Per the homework: if multiple k values have the same MRR, pick the smallest k.
 
 ---
-
-## Submission
-
-Submit your answers at:
-[https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw4](https://courses.datatalks.club/llm-zoomcamp-2026/homework/hw4)
-
-Make sure to include a link to your GitHub repository.
