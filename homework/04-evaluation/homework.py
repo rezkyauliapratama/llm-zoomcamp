@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from gitsource import GithubRepositoryDataReader, chunk_documents
 from minsearch import Index
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -57,24 +58,6 @@ if not os.path.exists(gt_path):
 gt_df = pd.read_csv(gt_path)
 ground_truth = gt_df.to_dict(orient="records")
 print(f"Loaded {len(ground_truth)} ground truth questions")
-
-# ---------------------------------------------------------------------------
-# Build search indices
-# ---------------------------------------------------------------------------
-print("Building search indices...")
-
-# Text (keyword) index
-text_index = Index(text_fields=["content"], keyword_fields=["filename"])
-text_index.fit(chunks)
-
-def text_search(query, num_results=5):
-    return text_index.search(query, num_results=num_results)
-
-# For vector search, create embeddings
-print("Computing embeddings for chunks...")
-# We use sentence-transformers compatible local model
-# In practice, we'd compute embeddings here. For the homework,
-# we use a lightweight approach.
 
 # ---------------------------------------------------------------------------
 # Q1: Average input tokens
@@ -124,47 +107,32 @@ for page_file in Q1_PAGES:
 avg_input = sum(input_tokens_list) / len(input_tokens_list)
 print(f"Input tokens per page: {input_tokens_list}")
 print(f"Average input tokens: {avg_input:.0f}")
-print(f"Closest option: ~14000")
+print(f"Closest option: ~1400")
 
 # ---------------------------------------------------------------------------
-# Q2: First result with text search
+# Build search indices
 # ---------------------------------------------------------------------------
-print("\n=== Q2: First result with text search ===")
+print("\nBuilding search indices...")
 
-q = ground_truth[0]["question"]
-text_results = text_search(q, num_results=5)
-text_first = text_results[0]["filename"]
-print(f"Question: {q[:80]}...")
-print(f"First text result: {text_first}")
-print(f"Expected: 01-agentic-rag/lessons/01-intro.md")
+# Text (keyword) index
+text_index = Index(text_fields=["content"], keyword_fields=["filename"])
+text_index.fit(chunks)
 
-# ---------------------------------------------------------------------------
-# Q3: First result with vector search
-# ---------------------------------------------------------------------------
-print("\n=== Q3: First result with vector search ===")
+def text_search(query, num_results=5):
+    return text_index.search(query, num_results=num_results)
 
-# For a complete run, this would use actual embeddings.
-# Since vector search requires an embedding model, we note:
-print("Vector search requires an embedding model (e.g., sentence-transformers).")
-print("To run: install sentence-transformers, embed all chunks, then search.")
-print("Expected: different from Q2 (vector search returns semantically similar content)")
+# Vector search with sentence-transformers
+print("Loading embedding model (all-MiniLM-L6-v2)...")
+model = SentenceTransformer("all-MiniLM-L6-v2")
+chunk_texts = [c["content"] for c in chunks]
+chunk_vectors = model.encode(chunk_texts, show_progress_bar=True)
+print(f"Computed embeddings: {chunk_vectors.shape}")
 
-# ---------------------------------------------------------------------------
-# Q4-Q5: Evaluate search (using pre-computed results from course module)
-# ---------------------------------------------------------------------------
-print("\n=== Q4: Text search Hit Rate ===")
-print("Full evaluation requires running all 360 questions through text_search.")
-print("Expected Hit Rate: ~0.66")
-print("Options: 0.55, 0.66, 0.76, 0.88")
-
-print("\n=== Q5: Vector search MRR ===")
-print("Expected MRR: ~0.55")
-print("Options: 0.35, 0.45, 0.55, 0.65")
-
-# ---------------------------------------------------------------------------
-# Q6: Tuning hybrid search
-# ---------------------------------------------------------------------------
-print("\n=== Q6: Hybrid search RRF k tuning ===")
+def vector_search(query, num_results=5):
+    q_vec = model.encode([query])[0]
+    scores = chunk_vectors @ q_vec
+    top_indices = np.argsort(scores)[::-1][:num_results]
+    return [chunks[i] for i in top_indices]
 
 def rrf(result_lists, k=60, num_results=5):
     scores = {}
@@ -179,18 +147,100 @@ def rrf(result_lists, k=60, num_results=5):
 
 def hybrid_search(query, k=60):
     text_results = text_search(query, num_results=10)
-    # In a full run, also get vector_results
-    # return rrf([text_results, vector_results], k=k)
-    return text_results[:5]
+    vector_results = vector_search(query, num_results=10)
+    return rrf([text_results, vector_results], k=k)
 
-print("Best k for RRF: 100")
-print("Options: 1, 50, 100, 200")
-print("k=100 balances rank contributions from both search methods")
+# ---------------------------------------------------------------------------
+# Q2: First result with text search
+# ---------------------------------------------------------------------------
+print("\n=== Q2: First result with text search ===")
 
-print("\n=== ALL ANSWERS ===")
-print(f"Q1: ~14000")
+q = ground_truth[0]["question"]
+text_results = text_search(q, num_results=5)
+text_first = text_results[0]["filename"]
+print(f"Question: {q[:80]}...")
+print(f"First text result: {text_first}")
+
+# ---------------------------------------------------------------------------
+# Q3: First result with vector search
+# ---------------------------------------------------------------------------
+print("\n=== Q3: First result with vector search ===")
+
+vector_results = vector_search(q, num_results=5)
+vec_first = vector_results[0]["filename"]
+print(f"First vector result: {vec_first}")
+print(f"Note: question generated from 01-agentic-rag/lessons/01-intro.md")
+
+# ---------------------------------------------------------------------------
+# Evaluation functions
+# ---------------------------------------------------------------------------
+print("\nEvaluating all 360 questions...")
+
+def compute_relevance(search_fn, q, correct_fn, num_results=5):
+    results = search_fn(q, num_results=num_results)
+    return [1 if r["filename"] == correct_fn else 0 for r in results]
+
+def hit_rate(relevance_list):
+    return np.mean([any(r) for r in relevance_list])
+
+def mrr(relevance_list):
+    total = 0.0
+    for rel in relevance_list:
+        for rank, r in enumerate(rel):
+            if r == 1:
+                total += 1.0 / (rank + 1)
+                break
+    return total / len(relevance_list)
+
+def evaluate(search_fn, ground_truth, num_results=5):
+    rel_list = []
+    for item in ground_truth:
+        rel = compute_relevance(search_fn, item["question"], item["filename"], num_results)
+        rel_list.append(rel)
+    return {"hit_rate": hit_rate(rel_list), "mrr": mrr(rel_list)}
+
+# ---------------------------------------------------------------------------
+# Q4: Evaluating text search
+# ---------------------------------------------------------------------------
+print("\n=== Q4: Evaluating text search ===")
+text_metrics = evaluate(text_search, ground_truth)
+print(f"Text search Hit Rate: {text_metrics['hit_rate']:.3f}")
+print(f"Text search MRR:      {text_metrics['mrr']:.3f}")
+
+# ---------------------------------------------------------------------------
+# Q5: Evaluating vector search
+# ---------------------------------------------------------------------------
+print("\n=== Q5: Evaluating vector search ===")
+vec_metrics = evaluate(vector_search, ground_truth)
+print(f"Vector search Hit Rate: {vec_metrics['hit_rate']:.3f}")
+print(f"Vector search MRR:      {vec_metrics['mrr']:.3f}")
+
+# ---------------------------------------------------------------------------
+# Q6: Tuning hybrid search
+# ---------------------------------------------------------------------------
+print("\n=== Q6: Tuning hybrid search RRF k ===")
+
+k_values = [1, 50, 100, 200]
+results = {}
+for k in k_values:
+    def make_hybrid(k_val):
+        return lambda q, nr=5: hybrid_search(q, k=k_val)
+    metrics = evaluate(make_hybrid(k), ground_truth)
+    results[k] = metrics
+    print(f"  k={k:>3}: Hit Rate={metrics['hit_rate']:.3f}, MRR={metrics['mrr']:.3f}")
+
+best_k = max(results, key=lambda k: results[k]["mrr"])
+print(f"\nBest k for RRF: {best_k}")
+
+# ---------------------------------------------------------------------------
+# All answers
+# ---------------------------------------------------------------------------
+print("\n" + "=" * 50)
+print("ALL ANSWERS")
+print("=" * 50)
+print(f"Q1: ~{avg_input:.0f}  → closest option: 1400")
 print(f"Q2: {text_first}")
-print(f"Q3: (varies, expected different from Q2)")
-print(f"Q4: ~0.66")
-print(f"Q5: ~0.55")
-print(f"Q6: k=100")
+print(f"Q3: {vec_first}")
+print(f"Q4: Hit Rate = {text_metrics['hit_rate']:.2f}")
+print(f"Q5: MRR = {vec_metrics['mrr']:.2f}")
+print(f"Q6: best k = {best_k}")

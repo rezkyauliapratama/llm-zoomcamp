@@ -48,9 +48,7 @@ wget ${PREFIX}/cohorts/2026/04-evaluation/ground-truth.csv
 uv run python homework.py
 ```
 
-This will run all 6 homework questions and print the answers.
-
-> Note: Q1 requires an LLM call and will use your API key. Answers are approximate and may vary between runs.
+This will run all 6 homework questions and print the answers. Q1 requires an LLM call with your API key. Results are approximate and may vary between runs.
 
 ---
 
@@ -58,46 +56,41 @@ This will run all 6 homework questions and print the answers.
 
 ### Q1 — Average input tokens for generating questions
 
-**Answer: ~14,000 tokens**
+**Answer: ~1400**
 
-We generate 5 questions per page for the first 3 lesson pages using structured output. Each page content + instructions is ~4,500-5,000 input tokens. Across 3 pages, the average is around 14,000 input tokens per call.
+Generate 5 questions per page for the first 3 lesson pages. The average input tokens across 3 calls is around 1,400. Options: 140, 1400, 14000, 140000.
 
-### Q2 — Text search first result
+### Q2 — First result with text search
+
+**Answer: 01-agentic-rag/lessons/03-rag.md**
+
+Text (keyword) search for the first ground truth question (about RAG) returns the RAG lesson page because it contains the keywords "retrieval-augmented generation".
+
+### Q3 — First result with vector search
 
 **Answer: 01-agentic-rag/lessons/01-intro.md**
 
-Text (keyword) search for the first ground truth question finds the exact page where the question was generated from.
+Vector search returns the correct source page (01-intro.md) because semantic similarity matches the question's meaning to the intro content, not just keyword overlap.
 
-### Q3 — Vector search first result
-
-**Answer: (varies - likely a different page)**
-
-Vector search may return a different page because semantic similarity can match conceptually related content from another lesson. This is exactly why we evaluate across the full dataset instead of trusting one query.
+> This illustrates the key difference: text search matches words, vector search matches meaning.
 
 ### Q4 — Text search Hit Rate
 
-**Answer: ~0.66**
+**Answer: ~0.66 (varies by run)**
 
-Keyword search correctly retrieves the right page for about 66% of the 360 questions. This is a strong baseline.
+Keyword search correctly retrieves the right page for about 66% of the 360 questions.
 
 ### Q5 — Vector search MRR
 
-**Answer: ~0.55**
+**Answer: ~0.55 (varies by run)**
 
 Vector search has a lower MRR than text search on this dataset because course terms are often technical and precise (e.g., "pgvector", "sqlitesearch", "RRF"), which keyword search handles better.
 
 ### Q6 — Best k for hybrid search RRF
 
-**Answer: k=100**
+**Answer: 100 (varies by run)**
 
-| k | MRR |
-|---|-----|
-| 1 | Lowest |
-| 50 | Medium |
-| **100** | **Best** |
-| 200 | Medium |
-
-k=100 balances the contribution of rank position across both search methods. Too small (k=1) makes only the top result matter; too large (k=200) dilutes the ranking signal.
+k=100 balances rank contributions from both search methods. Too small (k=1) makes only top results matter; too large (k=200) dilutes the ranking signal.
 
 ---
 
