@@ -76,21 +76,30 @@ Vector search returns the correct source page (01-intro.md) because semantic sim
 
 ### Q4 — Text search Hit Rate
 
-**Answer: ~0.66 (varies by run)**
+**Answer: 0.76**
 
-Keyword search correctly retrieves the right page for about 66% of the 360 questions.
+Keyword search correctly retrieves the right page for about 76% of the 360 questions. Options: 0.55, 0.66, 0.76, 0.88.
 
 ### Q5 — Vector search MRR
 
-**Answer: ~0.55 (varies by run)**
+**Answer: 0.64 (closest to 0.65)**
 
-Vector search has a lower MRR than text search on this dataset because course terms are often technical and precise (e.g., "pgvector", "sqlitesearch", "RRF"), which keyword search handles better.
+Vector search MRR is 0.64 on this run. Options: 0.35, 0.45, 0.55, 0.65.
+
+> Note: Vector search has a higher Hit Rate (0.81) but lower MRR compared to text search, meaning it finds the right page more often but ranks it lower on average.
 
 ### Q6 — Best k for hybrid search RRF
 
-**Answer: 100 (varies by run)**
+**Answer: k=1**
 
-k=100 balances rank contributions from both search methods. Too small (k=1) makes only top results matter; too large (k=200) dilutes the ranking signal.
+| k | Hit Rate | MRR |
+|---|----------|----:|
+| 1 | 0.858 | 0.672 |
+| 50 | 0.847 | 0.672 |
+| 100 | 0.847 | 0.672 |
+| 200 | 0.847 | 0.672 |
+
+k=1 gives the best MRR (tied with others) and the highest Hit Rate. Per the homework: if multiple k values have the same MRR, pick the smallest k.
 
 ---
 
