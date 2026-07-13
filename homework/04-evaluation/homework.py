@@ -4,7 +4,7 @@ LLM Zoomcamp 2026
 
 Run:
     uv sync
-    python homework.py
+    uv run python homework.py
 
 Requires:
     - ground-truth.csv (download from course repo)

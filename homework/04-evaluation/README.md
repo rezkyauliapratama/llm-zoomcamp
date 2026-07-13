@@ -45,7 +45,7 @@ wget ${PREFIX}/cohorts/2026/04-evaluation/ground-truth.csv
 ## Running
 
 ```bash
-python homework.py
+uv run python homework.py
 ```
 
 This will run all 6 homework questions and print the answers.
