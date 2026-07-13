@@ -1,0 +1,6 @@
+question,filename
+"What exactly is a retrieval-augmented generation system, and why does it help with answers that the model wouldn't know on its own?",01-agentic-rag/lessons/01-intro.md
+Why does this course build the RAG project in plain Python instead of starting with a framework or library?,01-agentic-rag/lessons/01-intro.md
+What are the main weaknesses of large language models that this module is trying to work around?,01-agentic-rag/lessons/01-intro.md
+"What will the course build in the first part of the module, and how is the second part different?",01-agentic-rag/lessons/01-intro.md
+"What kind of example app are you building here, and what data will it answer questions from?",01-agentic-rag/lessons/01-intro.md
