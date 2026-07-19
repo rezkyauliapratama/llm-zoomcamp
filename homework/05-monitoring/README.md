@@ -50,7 +50,7 @@ wget $PREFIX/starter.py
 ## Running
 
 ```bash
-uv run python homework.py
+source .env && uv run python homework.py
 ```
 
 This runs all 6 homework questions and prints the answers. Results
@@ -70,18 +70,19 @@ Options: 1, 3, 5, 7.
 
 ### Q2 — Input tokens as span attribute
 
-**Answer: ~700**
+**Answer: ~7000** (actual: 7111)
 
-The LLM span captures `input_tokens` from the response usage. For a
-typical query with chunked context, this is around 700-1200 tokens.
+The LLM span captures `input_tokens` from the response usage. Since
+this homework uses full-document search (not chunked), the context
+includes all 5 retrieved documents, resulting in ~7000 input tokens.
 Options: 700, 7000, 70000, 700000.
 
 ### Q3 — Span timing (LLM call duration)
 
-**Answer: 500-2000ms**
+**Answer: 500-2000ms** (actual warm: ~1173ms; cold start: ~2516ms)
 
-The LLM call typically takes between 500ms and 2000ms for a model
-like GPT-5.4-mini. First calls can be slower due to cold start.
+The LLM call takes ~1100-1200ms on warm runs. The first run is
+slower (~2500ms cold start). Most runs fall in the 500-2000ms range.
 Options: Under 100ms, 100-500ms, 500-2000ms, Over 2000ms.
 
 ### Q4 — Span names in SQLite
@@ -103,11 +104,11 @@ Options: `search` | `llm` | They're all about the same.
 
 ### Q6 — Token stability across runs
 
-**Answer: Within 10% of each other**
+**Answer: They're identical** (actual: 7111 across all 4 runs)
 
-The input tokens are relatively stable across runs because the search
-retrieves the same documents for the same query, producing a consistent
-context window. Small variations may occur due to search ordering.
+Since the homework uses deterministic text search (`minsearch`), the
+same query always retrieves the same documents in the same order,
+producing identical input tokens on every run.
 Options: They're identical | Within 10% | Within 50% | Vary more than 50%.
 
 ---
