@@ -22,7 +22,8 @@ llm-zoomcamp/
     ├── 01-agentic-rag/          # Module 01 — Agentic RAG
     ├── 02-vector-search/        # Module 02 — Vector Search
     ├── 03-orchestration/        # Module 03 — AI Orchestration
-    └── 04-evaluation/           # Module 04 — Evaluation
+    ├── 04-evaluation/           # Module 04 — Evaluation
+    └── 05-monitoring/           # Module 05 — Monitoring (OTel)
 ```
 
 ---
@@ -35,7 +36,7 @@ llm-zoomcamp/
 | 02 | Vector Search | [homework/02-vector-search](./homework/02-vector-search/) | ✅ Done |
 | 03 | AI Orchestration (Kestra) | [homework/03-orchestration](./homework/03-orchestration/) | ✅ Done |
 | 04 | Evaluation | [homework/04-evaluation](./homework/04-evaluation/) | ✅ Done |
-| 05 | TBD | TBD | ⏳ Pending |
+| 05 | Monitoring | [homework/05-monitoring](./homework/05-monitoring/) | ✅ Done |
 | 06 | TBD | TBD | ⏳ Pending |
 | 07 | TBD | TBD | ⏳ Pending |
 | 08 | TBD | TBD | ⏳ Pending |
@@ -70,10 +71,39 @@ Tech stack: **Kestra v1.3.21**, **PostgreSQL 18**, **Docker Compose**
 
 > Flow 3 uses OpenRouter (`io.kestra.plugin.ai.provider.OpenRouter`) with OpenAI-compatible endpoint, model `openai/gpt-5-mini`, and Tavily web search.
 
+### Module 04 — Evaluation
+
+Tech stack: **Python 3.12+**, **uv**, **OpenAI**, **minsearch**, **gitsource**
+
+| File | Description |
+|------|-------------|
+| `homework.py` | Full evaluation pipeline — Q1 to Q6 |
+| `ground-truth.csv` | 360 labeled questions across 72 course pages |
+| `pyproject.toml` | uv project configuration |
+
+### Module 05 — Monitoring (OpenTelemetry)
+
+Tech stack: **Python 3.12+**, **uv**, **OpenTelemetry**, **SQLite**, **minsearch**
+
+| File | Description |
+|------|-------------|
+| `rag_helper.py` | RAGBase class (from course starter) |
+| `starter.py` | Loads course docs, builds text-search index, creates RAG instance |
+| `homework.py` | OTel instrumentation — traces, span attributes, SQLite exporter, Q1-Q6 |
+| `pyproject.toml` | uv project config with opentelemetry-api, opentelemetry-sdk |
+
+Concepts covered:
+- OpenTelemetry traces, spans, and attributes
+- Manual code instrumentation with `start_as_current_span`
+- Custom `SpanExporter` (SQLite persistence)
+- Token/cost capture as span attributes
+- Trace data querying with pandas
+- Token stability analysis
+
 ---
 
 ## 🔗 References
 
 - [DataTalksClub/llm-zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp)
 - [Course Cohort 2026](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/cohorts/2026)
-\n### Module 04 — Evaluation\n\nTech stack: **Python 3.12+**, **uv**, **OpenAI**, **minsearch**, **gitsource**\n\n| File | Description |\n|------|-------------|\n| `homework.py` | Full evaluation pipeline — Q1 to Q6 |\n| `ground-truth.csv` | 360 labeled questions across 72 course pages |\n| `pyproject.toml` | uv project configuration |\n
+- [OpenTelemetry Python](https://opentelemetry.io/docs/languages/python/)
