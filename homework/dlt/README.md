@@ -27,7 +27,7 @@ Concepts covered:
 
 - Python 3.11+
 - uv package manager
-- OpenAI API key (or any OpenAI-compatible provider)
+- OpenAI API key (or any OpenAI-compatible provider like OpenRouter)
 - **Free Logfire account** at [logfire.dev](https://logfire.dev)
 
 ---
@@ -38,7 +38,8 @@ Concepts covered:
 
 ```bash
 cp .env.template .env
-# Edit .env with your OPENAI_API_KEY
+# Edit .env with your API key
+# For OpenRouter, add: OPENAI_BASE_URL=https://openrouter.ai/api/v1
 
 uv sync
 ```
@@ -46,12 +47,15 @@ uv sync
 ### 2. Verify the agent runs
 
 ```bash
-uv run python main.py
+source .env && uv run python main.py
 ```
 
 This downloads the DataTalks.Club FAQ, builds a minsearch index, and
 runs the Pydantic AI FAQ agent with the question "I just discovered
 the course. Can I join it?"
+
+> **OpenRouter users:** Pydantic AI respects `OPENAI_BASE_URL` from env.
+> The agent was verified working with OpenRouter (`gpt-5.4-mini`).
 
 ---
 
@@ -73,7 +77,7 @@ logfire.instrument_pydantic_ai()
 Run the query "How do I run Ollama locally?" and count spans in the
 Logfire dashboard.
 
-**Actual agent behavior** (from local run without Logfire):
+**Actual agent behavior** (from local run with OpenRouter):
 - LLM requests: **2** (initial + follow-up with tool results)
 - Tool calls: **3** (all parallel in one turn)
 - With Logfire instrumentation: agent run + LLM calls + tool calls
@@ -119,7 +123,7 @@ Options: 100-500 | 1500-5000 | 10000-20000 | 50000-100000.
 
 ```
 homework/dlt/
-├── .env.template    # API keys template
+├── .env.template    # API keys template (OpenAI / OpenRouter + Logfire)
 ├── .gitignore       # standard + *.duckdb
 ├── pyproject.toml   # uv project config
 ├── ingest.py        # Download FAQ + build minsearch index
@@ -131,10 +135,27 @@ homework/dlt/
 
 ---
 
+## OpenRouter Support
+
+Pydantic AI reads `OPENAI_BASE_URL` from the environment, so you can
+use any OpenAI-compatible provider without code changes:
+
+```bash
+export OPENAI_BASE_URL=https://openrouter.ai/api/v1
+export OPENAI_API_KEY=sk-or-...
+```
+
+The agent model string `openai:gpt-5.4-mini` works with OpenRouter
+because Pydantic AI's OpenAI provider routes through the custom base
+URL automatically. This was verified in local testing.
+
+---
+
 ## References
 
 - [Homework instructions](https://github.com/DataTalksClub/llm-zoomcamp/blob/main/cohorts/2026/workshops/dlt/homework.md)
 - [dltHub Logfire context](https://dlthub.com/context/source/logfire)
 - [Pydantic AI docs](https://ai.pydantic.dev/)
 - [Logfire docs](https://logfire.dev/docs)
+- [OpenRouter](https://openrouter.ai)
 - [DataTalksClub LLM Zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp)
