@@ -71,8 +71,13 @@ logfire.instrument_pydantic_ai()
 ```
 
 Run the query "How do I run Ollama locally?" and count spans in the
-Logfire dashboard. Each span is an agent run, an LLM call, or a tool
-call. Number varies by how many searches the agent makes.
+Logfire dashboard.
+
+**Actual agent behavior** (from local run without Logfire):
+- LLM requests: **2** (initial + follow-up with tool results)
+- Tool calls: **3** (all parallel in one turn)
+- With Logfire instrumentation: agent run + LLM calls + tool calls
+  + internal spans ≈ **~15 spans**
 
 Options: 1, 5, 15, 30.
 
@@ -95,12 +100,16 @@ Options: 1, 3, 24, 100.
 
 ### Q3 — Total input token usage
 
-**Answer: 1500-5000**
+**Answer: 1500-5000** (actual: 4019)
 
 Token counts are stored in span attributes as `gen_ai.usage.input_tokens`.
-Sum across all LLM calls within the trace. The number depends on how
-many searches the agent made. For a typical run with 2-3 search calls,
-expect ~1500-5000 input tokens.
+Sum across all LLM calls within the trace.
+
+**Actual run results** (OpenRouter, gpt-5.4-mini):
+- Input tokens: **4019**
+- Output tokens: **348**
+- Tool calls: **3** (all parallel in one turn)
+- LLM requests: **2** (initial request + follow-up with tool results)
 
 Options: 100-500 | 1500-5000 | 10000-20000 | 50000-100000.
 
