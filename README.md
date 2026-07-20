@@ -23,7 +23,9 @@ llm-zoomcamp/
     ├── 02-vector-search/        # Module 02 — Vector Search
     ├── 03-orchestration/        # Module 03 — AI Orchestration
     ├── 04-evaluation/           # Module 04 — Evaluation
-    └── 05-monitoring/           # Module 05 — Monitoring (OTel)
+    ├── 05-monitoring/           # Module 05 — Monitoring (OTel)
+    ├── dlt/                     # Workshop — dlt + Logfire
+    └── ...
 ```
 
 ---
@@ -37,6 +39,7 @@ llm-zoomcamp/
 | 03 | AI Orchestration (Kestra) | [homework/03-orchestration](./homework/03-orchestration/) | ✅ Done |
 | 04 | Evaluation | [homework/04-evaluation](./homework/04-evaluation/) | ✅ Done |
 | 05 | Monitoring | [homework/05-monitoring](./homework/05-monitoring/) | ✅ Done |
+| — | dlt Workshop | [homework/dlt](./homework/dlt/) | ✅ Done |
 | 06 | TBD | TBD | ⏳ Pending |
 | 07 | TBD | TBD | ⏳ Pending |
 | 08 | TBD | TBD | ⏳ Pending |
@@ -100,6 +103,25 @@ Concepts covered:
 - Trace data querying with pandas
 - Token stability analysis
 
+### dlt Workshop — Pydantic AI + Logfire + dlt
+
+Tech stack: **Python 3.11+**, **uv**, **Pydantic AI**, **Logfire**, **dlt**, **DuckDB**
+
+| File | Description |
+|------|-------------|
+| `agent.py` | Pydantic AI FAQ agent with search tool |
+| `ingest.py` | Download DataTalks.Club FAQ + build minsearch index |
+| `main.py` | Entry point — run the agent |
+| `homework.py` | Q1-Q3 — Logfire instrumentation, dlt pipeline, token analysis |
+| `pyproject.toml` | uv project config with pydantic-ai, logfire |
+
+Concepts covered:
+- Pydantic AI agents (declarative tool registration)
+- Logfire instrumentation for observability
+- Trace spans and attributes (LLM calls, tool calls)
+- dlt pipeline from Logfire source to DuckDB
+- Auto-normalization of nested trace JSON
+
 ---
 
 ## 🔗 References
@@ -107,3 +129,6 @@ Concepts covered:
 - [DataTalksClub/llm-zoomcamp](https://github.com/DataTalksClub/llm-zoomcamp)
 - [Course Cohort 2026](https://github.com/DataTalksClub/llm-zoomcamp/tree/main/cohorts/2026)
 - [OpenTelemetry Python](https://opentelemetry.io/docs/languages/python/)
+- [Pydantic AI](https://ai.pydantic.dev/)
+- [Logfire](https://logfire.dev)
+- [dltHub](https://dlthub.com)
