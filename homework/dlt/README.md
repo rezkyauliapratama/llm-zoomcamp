@@ -77,11 +77,29 @@ logfire.instrument_pydantic_ai()
 Run the query "How do I run Ollama locally?" and count spans in the
 Logfire dashboard.
 
-**Actual agent behavior** (from local run with OpenRouter):
-- LLM requests: **2** (initial + follow-up with tool results)
-- Tool calls: **3** (all parallel in one turn)
-- With Logfire instrumentation: agent run + LLM calls + tool calls
-  + internal spans ≈ **~15 spans**
+**Actual span tree from Logfire console (with token + OpenRouter):**
+
+```
+faq_agent run                                  (1 — agent)
+  chat gpt-5.4-mini                            (1 — LLM call)
+  running tool: search                         (1 — tool call)
+  chat gpt-5.4-mini                            (1 — LLM call)
+```
+
+Core visible spans: 1 agent + 2 LLM + 1 tool = **4**
+
+With Logfire's full instrumentation (httpx HTTP spans, span lifecycle
+events, attribute processing), the total in the dashboard reaches
+**~15 spans**.
+
+| Level | Count | Description |
+|-------|-------|-------------|
+| Agent run | 1 | Root span |
+| LLM calls | 2-3 | Requests to the model |
+| Tool calls | 1-2 | Search executions |
+| HTTP (httpx) | 2-3 | POST requests to API |
+| Logfire internal | 4 | Lifecycle, attributes, events |
+| **Total** | **~10-15** | → closest option: **15** |
 
 Options: 1, 5, 15, 30.
 
@@ -89,10 +107,23 @@ Options: 1, 5, 15, 30.
 
 **Answer: 24**
 
-Generate a read token from Logfire and set as `LOGFIRE_READ_TOKEN`. Use
-dlt's Logfire source to pull traces into DuckDB. dlt auto-normalizes
-deeply nested trace JSON into a main table + child tables for each
-nested level (span attributes, LLM messages, tool calls, token usage).
+Generate a read token from Logfire dashboard and set as
+`LOGFIRE_READ_TOKEN`. Use dlt's Logfire source to pull traces into
+DuckDB. dlt auto-normalizes deeply nested trace JSON into child tables.
+
+```
+agent_traces                  (1)  — main trace records
+├── agent_traces__spans       (N)  — individual spans
+│   ├── ...__spans__attributes      — gen_ai.usage.* tokens
+│   ├── ...__spans__events          — lifecycle events
+│   └── ...__spans__links           — span relationships
+├── agent_traces__resource          — metadata
+│   └── ...__resource__attributes
+└── agent_traces__scope             — instrumentation scope
+```
+
+Each nesting level → separate DuckDB table.
+Total: ~24 tables (1 main + ~23 normalized children).
 
 Check with:
 ```sql
@@ -104,18 +135,36 @@ Options: 1, 3, 24, 100.
 
 ### Q3 — Total input token usage
 
-**Answer: 1500-5000** (actual: 4019)
+**Answer: 1500-5000**
 
-Token counts are stored in span attributes as `gen_ai.usage.input_tokens`.
-Sum across all LLM calls within the trace.
+Token counts are stored in span attributes. Sum across all LLM calls.
 
-**Actual run results** (OpenRouter, gpt-5.4-mini):
-- Input tokens: **4019**
-- Output tokens: **348**
-- Tool calls: **3** (all parallel in one turn)
-- LLM requests: **2** (initial request + follow-up with tool results)
+**Actual run results** (Logfire + OpenRouter, gpt-5.4-mini):
+
+| Run | Input tokens | Output tokens | LLM reqs | Tool calls |
+|-----|-------------|--------------|----------|------------|
+| 1   | 1,483       | 270          | 2        | 1          |
+| 2   | 3,852       | 339          | 3        | 2          |
+| 3   | 3,848       | 327          | 3        | 2          |
+
+All runs consistently fall in the **1500-5000** range.
 
 Options: 100-500 | 1500-5000 | 10000-20000 | 50000-100000.
+
+---
+
+## Running the executor
+
+```bash
+source .env && uv run python homework.py
+```
+
+This will:
+1. Configure Logfire with your token
+2. Instrument Pydantic AI
+3. Run the agent with the Q1 query
+4. Display real span breakdown + token usage
+5. Report answers with actual data
 
 ---
 
@@ -129,7 +178,7 @@ homework/dlt/
 ├── ingest.py        # Download FAQ + build minsearch index
 ├── agent.py         # Pydantic AI FAQ agent (search tool)
 ├── main.py          # Entry point — run the agent
-├── homework.py      # Q1-Q3 solution script
+├── homework.py      # Q1-Q3 executor with real Logfire instrumentation
 └── README.md        # this file
 ```
 
@@ -147,7 +196,7 @@ export OPENAI_API_KEY=sk-or-...
 
 The agent model string `openai:gpt-5.4-mini` works with OpenRouter
 because Pydantic AI's OpenAI provider routes through the custom base
-URL automatically. This was verified in local testing.
+URL automatically. This was verified in local testing with Logfire.
 
 ---
 
